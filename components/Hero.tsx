@@ -32,7 +32,7 @@ export default function Hero({ items, mode, todayHomework }: HeroProps) {
           プリントの見落とし、<span className="text-accent-green">0</span>へ。
         </h1>
         <p className="text-gray-400 text-sm mb-8">お子さまの大切なおたよりを、かんたんに整理・管理できます。</p>
-        <div className="grid grid-cols-3 gap-4 max-w-md">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-md">
           <div className="bg-white/10 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold">{total}</div>
             <div className="text-xs text-gray-400 mt-1">登録数</div>

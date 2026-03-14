@@ -24,7 +24,49 @@ export default function MealMenuSection({ menus, mode, onUpsert, onDelete }: Pro
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold">献立一覧</h2>
       </div>
-      <div className="overflow-x-auto">
+      {/* モバイル: カードレイアウト */}
+      <div className="sm:hidden space-y-2">
+        {weekDates.map(({ weekday, dateStr }) => {
+          const menu = getMenu(dateStr);
+          return (
+            <div key={dateStr} className="border border-gray-200 rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-sm">{WEEKDAY_LABELS[weekday]}</span>
+                  <span className="text-xs text-gray-400">{dateStr.slice(5)}</span>
+                </div>
+                <button
+                  onClick={() => setEditDate(dateStr)}
+                  className="text-xs text-accent-green hover:underline cursor-pointer"
+                >
+                  編集
+                </button>
+              </div>
+              <div className="px-3 py-2 space-y-1">
+                <div className="flex gap-2 text-sm">
+                  <span className="text-xs text-gray-400 w-10 shrink-0 pt-0.5">給食</span>
+                  <span className="text-gray-700">{menu?.lunch || <span className="text-gray-300">-</span>}</span>
+                </div>
+                {isNursery && (
+                  <div className="flex gap-2 text-sm">
+                    <span className="text-xs text-gray-400 w-10 shrink-0 pt-0.5">おやつ</span>
+                    <span className="text-gray-700">{menu?.snack || <span className="text-gray-300">-</span>}</span>
+                  </div>
+                )}
+                {menu?.allergens && (
+                  <div className="flex gap-2 text-sm">
+                    <span className="text-xs text-gray-400 w-10 shrink-0 pt-0.5">アレルギー</span>
+                    <span className="text-xs text-gray-500">{menu.allergens}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* デスクトップ: テーブルレイアウト */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-sm border-collapse">
           <thead>
             <tr className="bg-gray-50">

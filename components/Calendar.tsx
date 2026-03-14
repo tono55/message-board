@@ -109,8 +109,8 @@ export default function Calendar({ items, currentMonth, selectedDate, onSelectDa
           </span>
         </button>
 
-        {/* 予定リスト */}
-        <div className="px-1 pb-1.5 space-y-0.5 min-h-[2rem]">
+        {/* 予定リスト（デスクトップ: タイトル表示） */}
+        <div className="hidden sm:block px-1 pb-1.5 space-y-0.5 min-h-[2rem]">
           {dayItems.slice(0, 4).map((item, j) => {
             const colors = CATEGORY_COLORS[item.cat];
             return (
@@ -125,6 +125,15 @@ export default function Calendar({ items, currentMonth, selectedDate, onSelectDa
           })}
           {dayItems.length > 4 && (
             <div className="text-[10px] text-gray-400 px-1">+{dayItems.length - 4}件</div>
+          )}
+        </div>
+        {/* 予定リスト（モバイル: ドット表示） */}
+        <div className="sm:hidden flex gap-0.5 justify-center pb-1.5 flex-wrap min-h-[1.5rem]">
+          {dayItems.slice(0, 4).map((item, j) => (
+            <span key={j} className={`w-1.5 h-1.5 rounded-full ${CATEGORY_COLORS[item.cat].dot}`} />
+          ))}
+          {dayItems.length > 4 && (
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
           )}
         </div>
       </div>

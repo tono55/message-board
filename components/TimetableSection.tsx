@@ -20,7 +20,42 @@ export default function TimetableSection({ timetable, onUpdate }: Props) {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold">時間割</h2>
       </div>
-      <div className="overflow-x-auto">
+      {/* モバイル: 曜日別カードレイアウト */}
+      <div className="sm:hidden space-y-2">
+        {WEEKDAYS.map(d => (
+          <div key={d} className="border border-gray-200 rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
+              <span className="font-medium text-sm">{WEEKDAY_LABELS[d]}</span>
+              <button
+                onClick={() => setEditDay(d)}
+                className="text-xs text-accent-green hover:underline cursor-pointer"
+              >
+                編集
+              </button>
+            </div>
+            <div className="px-3 py-2 flex flex-wrap gap-1.5">
+              {timetable[d].length === 0 ? (
+                <span className="text-xs text-gray-300">科目なし</span>
+              ) : (
+                timetable[d].map((entry, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <span className="text-xs text-gray-400 w-4 text-right">{i + 1}.</span>
+                    <span className={`text-xs px-1.5 py-0.5 rounded border font-medium ${getSubjectColor(entry.subject)}`}>
+                      {entry.subject}
+                    </span>
+                    {entry.note && (
+                      <span className="text-xs text-gray-400">{entry.note}</span>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* デスクトップ: テーブルレイアウト */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-sm border-collapse">
           <thead>
             <tr className="bg-gray-50">
