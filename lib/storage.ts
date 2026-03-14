@@ -65,6 +65,7 @@ export function saveMode(mode: SchoolMode): void {
 const SEEDED_KEY = `${STORAGE_PREFIX}-seeded`;
 const SEEDED_VERSION = '4'; // バージョンを上げると既存ユーザーも再シード
 
+
 export function seedSampleData(): void {
   if (typeof window === 'undefined') return;
   if (localStorage.getItem(SEEDED_KEY) === SEEDED_VERSION) return;
