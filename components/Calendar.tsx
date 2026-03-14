@@ -1,0 +1,228 @@
+'use client';
+
+import { useState } from 'react';
+import { Item } from '@/lib/types';
+import { getMonthDays, getTwoWeekDays, getWeekStart, toDateString, CATEGORY_COLORS } from '@/lib/utils';
+
+const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
+
+type CalendarView = '2weeks' | 'month';
+
+interface CalendarProps {
+  items: Item[];
+  currentMonth: Date;
+  selectedDate: string;
+  onSelectDate: (date: string) => void;
+  onChangeMonth: (delta: number) => void;
+}
+
+export default function Calendar({ items, currentMonth, selectedDate, onSelectDate, onChangeMonth }: CalendarProps) {
+  const [view, setView] = useState<CalendarView>('2weeks');
+  const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart(new Date()));
+
+  const todayStr = toDateString(new Date());
+
+  const itemsByDate: Record<string, Item[]> = {};
+  for (const item of items) {
+    if (item.date) {
+      if (!itemsByDate[item.date]) itemsByDate[item.date] = [];
+      itemsByDate[item.date].push(item);
+    }
+  }
+
+  const handleTwoWeekNav = (delta: number) => {
+    setWeekStart(prev => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() + delta * 14);
+      return d;
+    });
+  };
+
+  const handleViewToggle = (v: CalendarView) => {
+    if (v === '2weeks') setWeekStart(getWeekStart(new Date()));
+    setView(v);
+  };
+
+  // ─── 月ビュー用セル（コンパクト） ────────────────────────────
+  const renderMonthCell = (d: Date, key: number | string, isCurrentMonth?: boolean) => {
+    const dateStr = toDateString(d);
+    const isToday = dateStr === todayStr;
+    const isSelected = dateStr === selectedDate;
+    const dayItems = itemsByDate[dateStr] || [];
+    const dayOfWeek = d.getDay();
+    const dimmed = isCurrentMonth === false;
+
+    return (
+      <button
+        key={key}
+        onClick={() => onSelectDate(isSelected ? '' : dateStr)}
+        className={`
+          relative p-1 min-h-[44px] md:min-h-[56px] text-sm rounded-lg transition-colors cursor-pointer
+          ${dimmed ? 'text-gray-300' : dayOfWeek === 0 ? 'text-red-500' : dayOfWeek === 6 ? 'text-blue-500' : 'text-gray-700'}
+          ${isToday ? 'bg-accent-green/10 font-bold' : ''}
+          ${isSelected ? 'ring-2 ring-accent-green' : 'hover:bg-gray-50'}
+        `}
+      >
+        <span className={`${isToday ? 'bg-accent-green text-white rounded-full w-6 h-6 inline-flex items-center justify-center text-xs' : ''}`}>
+          {d.getDate()}
+        </span>
+        {dayItems.length > 0 && (
+          <div className="flex gap-0.5 justify-center mt-0.5 flex-wrap">
+            {dayItems.slice(0, 3).map((item, j) => (
+              <span key={j} className={`w-1.5 h-1.5 rounded-full ${CATEGORY_COLORS[item.cat].dot}`} />
+            ))}
+          </div>
+        )}
+      </button>
+    );
+  };
+
+  // ─── 2週間ビュー用セル（タイトル表示あり） ──────────────────
+  const renderTwoWeekCell = (d: Date, key: number | string) => {
+    const dateStr = toDateString(d);
+    const isToday = dateStr === todayStr;
+    const isSelected = dateStr === selectedDate;
+    const dayItems = itemsByDate[dateStr] || [];
+    const dayOfWeek = d.getDay();
+    const isSun = dayOfWeek === 0;
+    const isSat = dayOfWeek === 6;
+
+    return (
+      <div
+        key={key}
+        className={`
+          rounded-lg border transition-colors
+          ${isToday ? 'border-accent-green bg-accent-green/5' : isSelected ? 'border-accent-green' : 'border-gray-100'}
+          ${isSun ? 'bg-red-50/40' : isSat ? 'bg-blue-50/40' : 'bg-white'}
+        `}
+      >
+        {/* 日付ヘッダー行 */}
+        <button
+          onClick={() => onSelectDate(isSelected ? '' : dateStr)}
+          className="w-full text-left px-2 pt-1.5 pb-1 cursor-pointer"
+        >
+          <span className={`
+            text-xs font-bold inline-flex items-center justify-center w-6 h-6 rounded-full
+            ${isToday ? 'bg-accent-green text-white' : isSun ? 'text-red-500' : isSat ? 'text-blue-500' : 'text-gray-700'}
+          `}>
+            {d.getDate()}
+          </span>
+        </button>
+
+        {/* 予定リスト */}
+        <div className="px-1 pb-1.5 space-y-0.5 min-h-[2rem]">
+          {dayItems.slice(0, 4).map((item, j) => {
+            const colors = CATEGORY_COLORS[item.cat];
+            return (
+              <div
+                key={j}
+                className={`text-[10px] leading-tight px-1 py-0.5 rounded truncate ${colors.pill} ${item.done ? 'opacity-40 line-through' : ''}`}
+                title={item.title}
+              >
+                {item.title}
+              </div>
+            );
+          })}
+          {dayItems.length > 4 && (
+            <div className="text-[10px] text-gray-400 px-1">+{dayItems.length - 4}件</div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // ─── ラベル ───────────────────────────────────────────────────
+  const twoWeekDays = getTwoWeekDays(weekStart);
+  const twoWeekLabel = (() => {
+    const start = twoWeekDays[0];
+    const end = twoWeekDays[13];
+    const sm = start.getMonth() + 1;
+    const em = end.getMonth() + 1;
+    const sy = start.getFullYear();
+    const ey = end.getFullYear();
+    if (sy !== ey) return `${sy}年${sm}月〜${ey}年${em}月`;
+    if (sm !== em) return `${sy}年${sm}月〜${em}月`;
+    return `${sy}年${sm}月`;
+  })();
+
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  const monthDays = getMonthDays(year, month);
+
+  return (
+    <section id="calendar" className="max-w-5xl mx-auto px-4 py-8">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+
+        {/* ヘッダー */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => view === '2weeks' ? handleTwoWeekNav(-1) : onChangeMonth(-1)}
+            className="text-gray-400 hover:text-gray-700 p-1 cursor-pointer"
+          >
+            ◀
+          </button>
+
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-bold">
+              {view === '2weeks' ? twoWeekLabel : `${year}年${month + 1}月`}
+            </h2>
+            <div className="flex bg-gray-100 rounded-full p-0.5 text-xs">
+              <button
+                onClick={() => handleViewToggle('2weeks')}
+                className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+                  view === '2weeks' ? 'bg-white text-gray-800 shadow-sm font-medium' : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                2週間
+              </button>
+              <button
+                onClick={() => handleViewToggle('month')}
+                className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+                  view === 'month' ? 'bg-white text-gray-800 shadow-sm font-medium' : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                1ヶ月
+              </button>
+            </div>
+          </div>
+
+          <button
+            onClick={() => view === '2weeks' ? handleTwoWeekNav(1) : onChangeMonth(1)}
+            className="text-gray-400 hover:text-gray-700 p-1 cursor-pointer"
+          >
+            ▶
+          </button>
+        </div>
+
+        {/* 曜日ヘッダー */}
+        <div className="grid grid-cols-7 gap-1 mb-1">
+          {WEEKDAYS.map((w, i) => (
+            <div key={w} className={`text-center text-xs font-medium py-1 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-400'}`}>
+              {w}
+            </div>
+          ))}
+        </div>
+
+        {/* 2週間ビュー */}
+        {view === '2weeks' && (
+          <div className="space-y-1">
+            <div className="grid grid-cols-7 gap-1">
+              {twoWeekDays.slice(0, 7).map((d, i) => renderTwoWeekCell(d, i))}
+            </div>
+            <div className="border-t border-dashed border-gray-200 my-1" />
+            <div className="grid grid-cols-7 gap-1">
+              {twoWeekDays.slice(7, 14).map((d, i) => renderTwoWeekCell(d, i + 7))}
+            </div>
+          </div>
+        )}
+
+        {/* 月ビュー */}
+        {view === 'month' && (
+          <div className="grid grid-cols-7 gap-px">
+            {monthDays.map((d, i) => renderMonthCell(d, i, d.getMonth() === month))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
