@@ -13,6 +13,7 @@ interface DetailModalProps {
 export default function DetailModal({ item, onClose, onToggleDone, onDelete }: DetailModalProps) {
   const colors = CATEGORY_COLORS[item.cat];
   const days = daysUntil(item.date);
+  const isEvent = item.cat === '行事';
 
   return (
     <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4" onClick={onClose}>
@@ -41,14 +42,14 @@ export default function DetailModal({ item, onClose, onToggleDone, onDelete }: D
         {item.date && (
           <div className="flex items-center gap-2 mb-3">
             <span className="text-sm text-gray-500">📅 {formatDate(item.date)}</span>
-            {!item.done && item.date && days >= 0 && (
+            {!item.done && item.date && days >= 0 && !isEvent && (
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                 days === 0 ? 'bg-red-100 text-red-600' : days <= 2 ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600'
               }`}>
                 {days === 0 ? '今日' : `あと${days}日`}
               </span>
             )}
-            {!item.done && days < 0 && (
+            {!item.done && days < 0 && !isEvent && (
               <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-600">
                 期限超過
               </span>
