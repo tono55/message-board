@@ -48,7 +48,7 @@ export default function HealthLogSection({ records, onUpsert, onDelete }: Props)
       <div className={`rounded-xl p-4 mb-4 border ${todayRecord ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
         <div className="text-xs text-gray-500 mb-1">今朝の体温</div>
         {todayRecord ? (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
             <div className={`text-3xl font-bold ${todayRecord.temperature >= 37.5 ? 'text-red-600' : 'text-blue-700'}`}>
               {todayRecord.temperature.toFixed(1)}℃
             </div>
@@ -67,17 +67,17 @@ export default function HealthLogSection({ records, onUpsert, onDelete }: Props)
       {/* 7日間ミニチャート */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="text-xs text-gray-400 mb-3">7日間の体温推移</div>
-        <div className="flex items-end gap-1 h-24">
+        <div className="flex items-end gap-0.5 sm:gap-1 h-24">
           {recentRecords.map(({ date, record }) => {
             const isToday = date === today;
             const temp = record?.temperature;
             const height = temp ? Math.max(10, ((temp - tempMin) / tempRange) * 100) : 0;
             const isHigh = temp && temp >= 37.5;
             return (
-              <div key={date} className="flex-1 flex flex-col items-center gap-1">
+              <div key={date} className="flex-1 flex flex-col items-center gap-1 min-w-0">
                 {temp ? (
                   <>
-                    <span className={`text-xs font-medium ${isHigh ? 'text-red-500' : 'text-gray-600'}`}>
+                    <span className={`text-[10px] sm:text-xs font-medium ${isHigh ? 'text-red-500' : 'text-gray-600'}`}>
                       {temp.toFixed(1)}
                     </span>
                     <div

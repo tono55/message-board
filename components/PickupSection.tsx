@@ -32,7 +32,7 @@ export default function PickupSection({ pickups, onAdd }: Props) {
       <div className={`rounded-xl p-4 mb-4 border ${todayPickup ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
         <div className="text-xs text-gray-500 mb-1">今日のお迎え</div>
         {todayPickup ? (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
             <div className="text-2xl font-bold text-green-700">{todayPickup.plannedTime}</div>
             <div className="text-sm text-gray-600">{todayPickup.pickedUpBy}</div>
             {todayPickup.isExtended && (
@@ -46,22 +46,22 @@ export default function PickupSection({ pickups, onAdd }: Props) {
       </div>
 
       {/* 今週の一覧 */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 gap-1 sm:gap-2">
         {weekDates.map(({ weekday, dateStr }) => {
           const pickup = pickups.find(p => p.date === dateStr);
           const isToday = dateStr === today;
           return (
             <div
               key={dateStr}
-              className={`rounded-lg p-2 text-center text-sm border ${
+              className={`rounded-lg p-1.5 sm:p-2 text-center text-sm border overflow-hidden ${
                 isToday ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-white'
               }`}
             >
               <div className="text-xs text-gray-400 font-medium">{WEEKDAY_LABELS[weekday]}</div>
               {pickup ? (
                 <>
-                  <div className="font-bold text-gray-800">{pickup.plannedTime}</div>
-                  <div className="text-xs text-gray-500">{pickup.pickedUpBy}</div>
+                  <div className="font-bold text-gray-800 text-xs sm:text-sm">{pickup.plannedTime}</div>
+                  <div className="text-xs text-gray-500 truncate">{pickup.pickedUpBy}</div>
                   {pickup.isExtended && <div className="text-xs text-amber-600">延長</div>}
                 </>
               ) : (
