@@ -33,23 +33,23 @@ export default function Navbar({ mode, onModeChange, onAddClick }: NavbarProps) 
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
-      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="font-serif text-xl font-bold tracking-wide text-gray-800">
+      <div className="max-w-5xl mx-auto px-3 sm:px-4 h-14 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-serif text-base sm:text-xl font-bold tracking-wide text-gray-800 whitespace-nowrap">
             おたよりボード
           </span>
           <span className="hidden sm:inline-block text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
             {dateStr}
           </span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           {/* Mode toggle */}
           <div className="flex bg-gray-100 rounded-full p-0.5">
             {(['nursery', 'elementary'] as SchoolMode[]).map(m => (
               <button
                 key={m}
                 onClick={() => onModeChange(m)}
-                className={`text-xs px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                className={`text-xs px-2 sm:px-3 py-1 rounded-full transition-colors cursor-pointer ${
                   mode === m
                     ? 'bg-white text-gray-800 shadow-sm font-medium'
                     : 'text-gray-500 hover:text-gray-700'
@@ -71,9 +71,10 @@ export default function Navbar({ mode, onModeChange, onAddClick }: NavbarProps) 
           ))}
           <button
             onClick={onAddClick}
-            className="bg-accent-green hover:bg-green-600 text-white text-sm font-medium px-4 py-1.5 rounded-full transition-colors cursor-pointer"
+            className="bg-accent-green hover:bg-green-600 text-white text-sm font-medium px-3 sm:px-4 py-1.5 rounded-full transition-colors cursor-pointer"
           >
-            ＋ 追加
+            <span className="hidden sm:inline">＋ 追加</span>
+            <span className="sm:hidden">＋</span>
           </button>
           {/* Mobile hamburger */}
           <button
