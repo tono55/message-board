@@ -8,10 +8,9 @@ import PickupEditModal from './PickupEditModal';
 interface Props {
   pickups: PickupRecord[];
   onAdd: (record: PickupRecord) => void;
-  onDelete: (date: string) => void;
 }
 
-export default function PickupSection({ pickups, onAdd, onDelete }: Props) {
+export default function PickupSection({ pickups, onAdd }: Props) {
   const [showModal, setShowModal] = useState(false);
   const today = todayString();
   const todayPickup = pickups.find(p => p.date === today);

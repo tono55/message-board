@@ -15,7 +15,8 @@ export function useMealMenus(mode: SchoolMode, loaded: boolean) {
   const [menus, setMenus] = useState<MealMenu[]>([]);
 
   useEffect(() => {
-    if (loaded) setMenus(loadMealMenus(mode));
+    if (!loaded) return;
+    queueMicrotask(() => setMenus(loadMealMenus(mode)));
   }, [mode, loaded]);
 
   useEffect(() => {
@@ -45,7 +46,8 @@ export function useTimetable(loaded: boolean) {
   const [timetable, setTimetable] = useState<Timetable>({ mon: [], tue: [], wed: [], thu: [], fri: [] });
 
   useEffect(() => {
-    if (loaded) setTimetable(loadTimetable());
+    if (!loaded) return;
+    queueMicrotask(() => setTimetable(loadTimetable()));
   }, [loaded]);
 
   useEffect(() => {
@@ -63,7 +65,8 @@ export function usePickups(loaded: boolean) {
   const [pickups, setPickups] = useState<PickupRecord[]>([]);
 
   useEffect(() => {
-    if (loaded) setPickups(loadPickups());
+    if (!loaded) return;
+    queueMicrotask(() => setPickups(loadPickups()));
   }, [loaded]);
 
   useEffect(() => {
@@ -88,7 +91,8 @@ export function useHomework(loaded: boolean) {
   const [homework, setHomework] = useState<HomeworkEntry[]>([]);
 
   useEffect(() => {
-    if (loaded) setHomework(loadHomework());
+    if (!loaded) return;
+    queueMicrotask(() => setHomework(loadHomework()));
   }, [loaded]);
 
   useEffect(() => {
@@ -115,7 +119,8 @@ export function useHealthRecords(loaded: boolean) {
   const [records, setRecords] = useState<HealthRecord[]>([]);
 
   useEffect(() => {
-    if (loaded) setRecords(loadHealthRecords());
+    if (!loaded) return;
+    queueMicrotask(() => setRecords(loadHealthRecords()));
   }, [loaded]);
 
   useEffect(() => {
