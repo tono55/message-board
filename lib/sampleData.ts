@@ -13,74 +13,22 @@ function weekDate(offsetDays: number): string {
   return toDateString(d);
 }
 
-function relDate(offsetDays: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetDays);
-  return toDateString(d);
-}
 
 // ─── 保育園 Items ─────────────────────────────────────────────
 export const NURSERY_SAMPLE_ITEMS: Item[] = [
-  {
-    id: 'ns-1',
-    title: '春の遠足のお知らせ',
-    cat: '行事',
-    date: relDate(10),
-    memo: '持ち物: お弁当、水筒、レジャーシート、帽子。雨天中止の場合は前日18時にメール連絡します。',
-    done: false,
-    checkItems: [],
-    mode: 'nursery',
-  },
-  {
-    id: 'ns-2',
-    title: '4月の保育参観',
-    cat: '行事',
-    date: relDate(18),
-    memo: '10:00〜11:30。保護者証をお持ちください。駐車場は園庭をご利用ください。',
-    done: false,
-    checkItems: [],
-    mode: 'nursery',
-  },
-  {
-    id: 'ns-3',
-    title: '健康診断のお知らせ',
-    cat: 'お知らせ',
-    date: relDate(5),
-    memo: '園医による内科・歯科検診を実施します。当日は動きやすい服装でお越しください。',
-    done: false,
-    checkItems: [],
-    mode: 'nursery',
-  },
-  {
-    id: 'ns-4',
-    title: '4月の給食献立表',
-    cat: '給食',
-    date: relDate(1),
-    memo: 'アレルギー対応が必要な方は担任まで早めにご相談ください。',
-    done: true,
-    checkItems: [],
-    mode: 'nursery',
-  },
-  {
-    id: 'ns-5',
-    title: '絵本バッグの持参について',
-    cat: '持ち物',
-    date: relDate(3),
-    memo: '毎週金曜日に絵本の貸し出しを行います。専用の絵本バッグをご用意ください（市販品で可）。',
-    done: false,
-    checkItems: [],
-    mode: 'nursery',
-  },
-  {
-    id: 'ns-6',
-    title: '連絡帳の記入のお願い',
-    cat: '連絡帳',
-    date: relDate(0),
-    memo: '体温・朝食の有無・体調の欄を毎朝ご記入ください。',
-    done: true,
-    checkItems: [],
-    mode: 'nursery',
-  },
+  { id: 'ns-1', title: '3月3日（火）体操', cat: '行事', date: '2026-03-03', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-2', title: '3月5日（木）リトミック参観', cat: '行事', date: '2026-03-05', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-3', title: '3月6日（金）ひまわり組を送る会', cat: '行事', date: '2026-03-06', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-4', title: '3月10日（火）卒園式予行', cat: '行事', date: '2026-03-10', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-5', title: '3月12日（木）英語', cat: '行事', date: '2026-03-12', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-6', title: '3月14日（土）卒園式', cat: '行事', date: '2026-03-14', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-7', title: '3月16日（月）造形ばら・ゆり', cat: '行事', date: '2026-03-16', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-8', title: '3月17日（火）体操', cat: '行事', date: '2026-03-17', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-9', title: '3月18日（水）誕生会', cat: '行事', date: '2026-03-18', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-10', title: '3月20日（金）春分の日', cat: '行事', date: '2026-03-20', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-11', title: '3月24日（火）卒園遠足', cat: '行事', date: '2026-03-24', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-12', title: '3月26日（木）英語', cat: '行事', date: '2026-03-26', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
+  { id: 'ns-13', title: '3月31日（火）進級式', cat: '行事', date: '2026-03-31', memo: '〜3月の保育園行事予定', done: false, checkItems: [], mode: 'nursery' },
 ];
 
 // ─── 小学校 Items（2年3組 3/16〜3/20）─────────────────────────
@@ -169,11 +117,22 @@ export const ELEMENTARY_SAMPLE_ITEMS: Item[] = [
 
 // ─── 献立（保育園） ───────────────────────────────────────────
 export const NURSERY_MEAL_SAMPLE: MealMenu[] = [
-  { date: weekDate(0), lunch: 'カレーライス・グリーンサラダ・牛乳', snack: 'りんご・せんべい', allergens: '乳・小麦' },
-  { date: weekDate(1), lunch: 'ハンバーグ・コーンスープ・パン・牛乳', snack: 'バナナ・ビスケット', allergens: '乳・卵・小麦' },
-  { date: weekDate(2), lunch: 'ちゃんぽん・小松菜おひたし・牛乳', snack: 'さつまいもスティック', allergens: '乳・小麦・えび' },
-  { date: weekDate(3), lunch: '親子丼・みそ汁・牛乳', snack: 'ヨーグルト・ゼリー', allergens: '乳・卵・小麦・大豆' },
-  { date: weekDate(4), lunch: 'スパゲッティミートソース・コールスロー・牛乳', snack: 'おにぎり・麦茶', allergens: '乳・卵・小麦' },
+  { date: '2026-03-02', lunch: 'のりたまごはん・鶏の照り焼き・切り干し大根の和え物・たまねぎとじゃがいものみそ汁', snack: 'りんご' },
+  { date: '2026-03-03', lunch: 'お花のいろどりむすび・鮭のオーロラソース・ブロッコリーのおかか和え・菜の花と油麩のすまし汁', snack: 'ももゼリー' },
+  { date: '2026-03-04', lunch: '具沢山ちゃんぽんめん・大学いも・のりとしらすのサラダ・ソフール いちご味', snack: '' },
+  { date: '2026-03-05', lunch: '納豆ご飯（きりざい）・さばのごまねぎソース・茎わかめの炒り煮・はくさいとなすのみそ汁', snack: 'バナナ' },
+  { date: '2026-03-06', lunch: 'マカロニグラタン・コーンとレタスのサラダ・ポトフスープ', snack: 'みかん' },
+  { date: '2026-03-07', lunch: 'ねぎ塩にゅうめん・和風じゃがベー・青りんごゼリー', snack: '' },
+  { date: '2026-03-09', lunch: '白飯・かじきのフライ・なっとうサラダ・せりと豚肉のみそ汁', snack: 'バナナ' },
+  { date: '2026-03-10', lunch: 'タコライス・ウィンナーとアスパラのソテー・アーサー汁・チチヤスヨーグルト', snack: '' },
+  { date: '2026-03-11', lunch: 'バターロール・スパニッシュオムレツ・トマトとキャベツのサラダ・ゴロゴロ野菜のミルクスープ', snack: 'バナナ' },
+  { date: '2026-03-12', lunch: 'たらこスパゲッティ・スティックサラダ・肉団子スープ・青りんごゼリー', snack: '' },
+  { date: '2026-03-13', lunch: 'チキンカレーライス・もやしとささみのナムル・かき玉汁', snack: 'バナナ' },
+  { date: '2026-03-18', lunch: 'ハンバーガー・しましまハムチーズ・春セロリの鶏がらスープ・ピーチゼリー', snack: '' },
+  { date: '2026-03-24', lunch: '麻婆豆腐丼・せんまいの3色ナムル・ビーフンスープ', snack: 'りんご' },
+  { date: '2026-03-28', lunch: '五目豚肉うどん・鶏肉とさつまいもの洋風ソテー・チチヤスヨーグルト', snack: '' },
+  { date: '2026-03-30', lunch: 'ミートソーススパゲティー・ウィンナーとアスパラのソテー・アーサー汁・チチヤスヨーグルト', snack: '' },
+  { date: '2026-03-31', lunch: 'バターロール・ハンバーグ・マカロニサラダ・コーンスープ', snack: 'みかん' },
 ];
 
 // ─── 献立（小学校） ───────────────────────────────────────────

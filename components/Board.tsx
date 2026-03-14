@@ -7,7 +7,6 @@ import Card from './Card';
 
 interface BoardProps {
   items: Item[];
-  categories: Category[];
   selectedDate: string;
   selectedCat: Category | '';
   onSelectCat: (cat: Category | '') => void;
@@ -33,7 +32,7 @@ function getAllCategories(items: Item[]): Category[] {
   return result;
 }
 
-export default function Board({ items, categories, selectedDate, selectedCat, onSelectCat, onCardClick }: BoardProps) {
+export default function Board({ items, selectedDate, selectedCat, onSelectCat, onCardClick }: BoardProps) {
   const [modeFilter, setModeFilter] = useState<SchoolMode | ''>('');
 
   const allCategories = getAllCategories(items);
