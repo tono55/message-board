@@ -8,10 +8,9 @@ import PickupEditModal from './PickupEditModal';
 interface Props {
   pickups: PickupRecord[];
   onAdd: (record: PickupRecord) => void;
-  onDelete: (date: string) => void;
 }
 
-export default function PickupSection({ pickups, onAdd, onDelete }: Props) {
+export default function PickupSection({ pickups, onAdd }: Props) {
   const [showModal, setShowModal] = useState(false);
   const today = todayString();
   const todayPickup = pickups.find(p => p.date === today);
@@ -47,7 +46,7 @@ export default function PickupSection({ pickups, onAdd, onDelete }: Props) {
       </div>
 
       {/* 今週の一覧 */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
         {weekDates.map(({ weekday, dateStr }) => {
           const pickup = pickups.find(p => p.date === dateStr);
           const isToday = dateStr === today;

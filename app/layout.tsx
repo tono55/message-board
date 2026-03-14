@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 
@@ -14,6 +14,11 @@ const notoSansJP = Noto_Sans_JP({
   weight: ["400", "500", "700"],
 });
 
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 export const metadata: Metadata = {
   title: "おたよりボード - 小学校プリント管理",
   description: "小学校のプリントや行事をかんたんに管理できるWebアプリ",

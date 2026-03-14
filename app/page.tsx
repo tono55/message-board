@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Item, Category, SchoolMode } from '@/lib/types';
 import { loadItems, saveItems, loadMode, saveMode, seedSampleData } from '@/lib/storage';
 import { generateId, getCategoriesForMode, todayString } from '@/lib/utils';
@@ -34,7 +34,7 @@ export default function Home() {
 
   const categories = getCategoriesForMode(mode);
   // 掲示板用: 両モードをマージ
-  const allItems = [...nurseryItems, ...elementaryItems];
+  const allItems = useMemo(() => [...nurseryItems, ...elementaryItems], [nurseryItems, elementaryItems]);
 
   const { menus, upsertMenu, deleteMenu } = useMealMenus(mode, loaded);
   const { timetable, updateTimetable } = useTimetable(loaded);
@@ -47,12 +47,23 @@ export default function Home() {
   const currentItems = isNursery ? nurseryItems : elementaryItems;
 
   useEffect(() => {
+    let cancelled = false;
     seedSampleData();
     const savedMode = loadMode();
-    setMode(savedMode);
-    setNurseryItems(loadItems('nursery'));
-    setElementaryItems(loadItems('elementary'));
-    setLoaded(true);
+    const nursery = loadItems('nursery');
+    const elementary = loadItems('elementary');
+
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setMode(savedMode);
+      setNurseryItems(nursery);
+      setElementaryItems(elementary);
+      setLoaded(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // 各モードを個別に保存
@@ -159,7 +170,6 @@ export default function Home() {
 
       <Board
         items={allItems}
-        categories={categories}
         selectedDate={selectedDate}
         selectedCat={selectedCat}
         onSelectCat={setSelectedCat}
