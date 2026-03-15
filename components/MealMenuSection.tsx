@@ -14,15 +14,57 @@ interface Props {
 
 export default function MealMenuSection({ menus, mode, onUpsert, onDelete }: Props) {
   const [editDate, setEditDate] = useState<string | null>(null);
-  const weekDates = getWeekDates();
+  // 献立は月〜金表示なので月曜起点で管理
+  const [weekStart, setWeekStart] = useState<Date>(() => {
+    const today = new Date();
+    const day = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  });
   const isNursery = mode === 'nursery';
 
+  const weekDates = getWeekDates(weekStart);
   const getMenu = (dateStr: string) => menus.find(m => m.date === dateStr);
+
+  const navigate = (delta: number) => {
+    setWeekStart(prev => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() + delta * 7);
+      return d;
+    });
+  };
+
+  const weekLabel = (() => {
+    const first = weekDates[0].date;
+    const last = weekDates[4].date;
+    const fy = first.getFullYear();
+    const fm = first.getMonth() + 1;
+    const em = last.getMonth() + 1;
+    if (fm !== em) return `${fy}年${fm}月〜${em}月`;
+    return `${fy}年${fm}月`;
+  })();
 
   return (
     <section id="meal-menu" className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold">献立一覧</h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-gray-400 hover:text-gray-700 p-1 cursor-pointer"
+          >
+            ◀
+          </button>
+          <span className="text-sm text-gray-600 min-w-[7rem] text-center">{weekLabel}</span>
+          <button
+            onClick={() => navigate(1)}
+            className="text-gray-400 hover:text-gray-700 p-1 cursor-pointer"
+          >
+            ▶
+          </button>
+        </div>
       </div>
       {/* モバイル: カードレイアウト */}
       <div className="sm:hidden space-y-2">
@@ -72,9 +114,8 @@ export default function MealMenuSection({ menus, mode, onUpsert, onDelete }: Pro
             <tr className="bg-gray-50">
               <th className="border border-gray-200 px-3 py-2 text-left w-16">曜日</th>
               <th className="border border-gray-200 px-3 py-2 text-left">給食</th>
-              {isNursery && <th className="border border-gray-200 px-3 py-2 text-left">おやつ</th>}
-              <th className="border border-gray-200 px-3 py-2 text-left w-24">アレルゲン</th>
-              <th className="border border-gray-200 px-3 py-2 w-16"></th>
+              {isNursery && <th className="border border-gray-200 px-3 py-2 text-left w-28">おやつ</th>}
+              <th className="border border-gray-200 px-3 py-2 w-16 text-center"></th>
             </tr>
           </thead>
           <tbody>
@@ -82,21 +123,23 @@ export default function MealMenuSection({ menus, mode, onUpsert, onDelete }: Pro
               const menu = getMenu(dateStr);
               return (
                 <tr key={dateStr} className="hover:bg-gray-50">
-                  <td className="border border-gray-200 px-3 py-2 font-medium">
+                  <td className="border border-gray-200 px-3 py-2 font-medium whitespace-nowrap">
                     {WEEKDAY_LABELS[weekday]}
-                    <span className="text-xs text-gray-400 block">{dateStr.slice(5)}</span>
+                    <span className="text-xs text-gray-400 block">{dateStr.slice(5).replace('-', '/')}</span>
                   </td>
-                  <td className="border border-gray-200 px-3 py-2">
-                    {menu?.lunch || <span className="text-gray-300">-</span>}
+                  <td className="border border-gray-200 px-3 py-2 leading-relaxed">
+                    {menu?.lunch
+                      ? menu.lunch.split('／').map((line, i) => (
+                          <span key={i} className="block">{line}</span>
+                        ))
+                      : <span className="text-gray-300">-</span>
+                    }
                   </td>
                   {isNursery && (
                     <td className="border border-gray-200 px-3 py-2">
                       {menu?.snack || <span className="text-gray-300">-</span>}
                     </td>
                   )}
-                  <td className="border border-gray-200 px-3 py-2 text-xs text-gray-500">
-                    {menu?.allergens || ''}
-                  </td>
                   <td className="border border-gray-200 px-3 py-2 text-center">
                     <button
                       onClick={() => setEditDate(dateStr)}
