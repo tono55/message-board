@@ -169,6 +169,7 @@ export default function Home() {
 
       <Board
         items={allItems}
+        mode={mode}
         selectedDate={selectedDate}
         selectedCat={selectedCat}
         onSelectCat={setSelectedCat}

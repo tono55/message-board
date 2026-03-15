@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Item, Category, SchoolMode } from '@/lib/types';
 import { CATEGORY_COLORS, daysUntil } from '@/lib/utils';
 import Card from './Card';
 
 interface BoardProps {
   items: Item[];
+  mode: SchoolMode;
   selectedDate: string;
   selectedCat: Category | '';
   onSelectCat: (cat: Category | '') => void;
@@ -38,9 +39,13 @@ function getAllCategories(items: Item[]): Category[] {
   return result;
 }
 
-export default function Board({ items, selectedDate, selectedCat, onSelectCat, onCardClick }: BoardProps) {
-  const [modeFilter, setModeFilter] = useState<SchoolMode | ''>('');
+export default function Board({ items, mode, selectedDate, selectedCat, onSelectCat, onCardClick }: BoardProps) {
+  const [modeFilter, setModeFilter] = useState<SchoolMode | ''>(mode);
   const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTER_OPTIONS)[number]['value']>('');
+
+  useEffect(() => {
+    setModeFilter(mode);
+  }, [mode]);
 
   const allCategories = getAllCategories(items);
 

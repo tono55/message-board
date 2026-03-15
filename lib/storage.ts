@@ -31,11 +31,23 @@ function saveJson<T>(key: string, data: T): void {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
+function dedupeItems(items: Item[]): Item[] {
+  const seen = new Set<string>();
+  const result: Item[] = [];
+  for (const item of items) {
+    const key = `${item.mode}::${item.date}::${item.title}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(item);
+  }
+  return result;
+}
+
 export function loadItems(mode: SchoolMode): Item[] {
   if (typeof window === 'undefined') return [];
   try {
     const data = localStorage.getItem(itemsKey(mode));
-    return data ? JSON.parse(data) : [];
+    return data ? dedupeItems(JSON.parse(data)) : [];
   } catch {
     return [];
   }
@@ -43,7 +55,7 @@ export function loadItems(mode: SchoolMode): Item[] {
 
 export function saveItems(mode: SchoolMode, items: Item[]): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(itemsKey(mode), JSON.stringify(items));
+  localStorage.setItem(itemsKey(mode), JSON.stringify(dedupeItems(items)));
 }
 
 export function loadMode(): SchoolMode {
@@ -90,8 +102,8 @@ export function seedSampleData(): void {
 
   const seededMonths = loadJson<string[]>(SEEDED_MONTHS_KEY, []);
 
-  saveJson(itemsKey('nursery'), mergeItems(loadItems('nursery'), sampleData.nurseryItems));
-  saveJson(itemsKey('elementary'), mergeItems(loadItems('elementary'), sampleData.elementaryItems));
+  saveJson(itemsKey('nursery'), dedupeItems(mergeItems(loadItems('nursery'), sampleData.nurseryItems)));
+  saveJson(itemsKey('elementary'), dedupeItems(mergeItems(loadItems('elementary'), sampleData.elementaryItems)));
   saveJson(storageKey('nursery', 'meals'), mergeMeals(loadMealMenus('nursery'), sampleData.nurseryMeals));
   saveJson(storageKey('elementary', 'meals'), mergeMeals(loadMealMenus('elementary'), sampleData.elementaryMeals));
 
