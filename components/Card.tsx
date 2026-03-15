@@ -21,8 +21,9 @@ const MODE_LABEL: Record<string, string> = {
 export default function Card({ item, onClick }: CardProps) {
   const colors = CATEGORY_COLORS[item.cat];
   const days = daysUntil(item.date);
-  const isOverdue = days < 0 && !item.done;
-  const isUrgent = days >= 0 && days <= 2 && !item.done;
+  const isEvent = item.cat === '行事';
+  const isOverdue = days < 0 && !item.done && !isEvent;
+  const isUrgent = days >= 0 && days <= 2 && !item.done && !isEvent;
 
   return (
     <button
