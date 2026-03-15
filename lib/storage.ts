@@ -81,8 +81,20 @@ function mergeItems(existing: Item[], incoming: Item[]): Item[] {
 }
 
 function mergeMeals(existing: MealMenu[], incoming: MealMenu[]): MealMenu[] {
+  const incomingByDate = new Map(incoming.map(menu => [menu.date, menu]));
+  const merged = existing.map(menu => {
+    const incomingMenu = incomingByDate.get(menu.date);
+    if (!incomingMenu) return menu;
+
+    const isPlaceholderElementaryMeal =
+      menu.lunch === '給食最終日' ||
+      (menu.memo === '通常給食' && !menu.lunch.includes('／'));
+
+    return isPlaceholderElementaryMeal ? incomingMenu : menu;
+  });
+
   const existingDates = new Set(existing.map(menu => menu.date));
-  return [...existing, ...incoming.filter(menu => !existingDates.has(menu.date))];
+  return [...merged, ...incoming.filter(menu => !existingDates.has(menu.date))];
 }
 
 function mergeHomework(existing: HomeworkEntry[], incoming: HomeworkEntry[]): HomeworkEntry[] {
