@@ -1,8 +1,7 @@
 import { Item, SchoolMode, MealMenu, Timetable, PickupRecord, HomeworkEntry, HealthRecord } from './types';
 import {
-  NURSERY_SAMPLE_ITEMS, ELEMENTARY_SAMPLE_ITEMS,
-  NURSERY_MEAL_SAMPLE, ELEMENTARY_MEAL_SAMPLE,
-  TIMETABLE_SAMPLE, HOMEWORK_SAMPLE,
+  getSampleDataForMonth,
+  getSampleMonthKey,
 } from './sampleData';
 
 const STORAGE_PREFIX = 'otayori-board';
@@ -62,25 +61,49 @@ export function saveMode(mode: SchoolMode): void {
   localStorage.setItem(MODE_KEY, mode);
 }
 
-const SEEDED_KEY = `${STORAGE_PREFIX}-seeded`;
-const SEEDED_VERSION = '4'; // バージョンを上げると既存ユーザーも再シード
+const SEEDED_MONTHS_KEY = `${STORAGE_PREFIX}-seeded-months`;
+
+function mergeItems(existing: Item[], incoming: Item[]): Item[] {
+  const existingIds = new Set(existing.map(item => item.id));
+  return [...existing, ...incoming.filter(item => !existingIds.has(item.id))];
+}
+
+function mergeMeals(existing: MealMenu[], incoming: MealMenu[]): MealMenu[] {
+  const existingDates = new Set(existing.map(menu => menu.date));
+  return [...existing, ...incoming.filter(menu => !existingDates.has(menu.date))];
+}
+
+function mergeHomework(existing: HomeworkEntry[], incoming: HomeworkEntry[]): HomeworkEntry[] {
+  const existingIds = new Set(existing.map(entry => entry.id));
+  return [...existing, ...incoming.filter(entry => !existingIds.has(entry.id))];
+}
+
+function isEmptyTimetable(timetable: Timetable): boolean {
+  return Object.values(timetable).every(entries => entries.length === 0);
+}
 
 export function seedSampleData(): void {
   if (typeof window === 'undefined') return;
-  if (localStorage.getItem(SEEDED_KEY) === SEEDED_VERSION) return;
+  const monthKey = getSampleMonthKey();
+  const sampleData = getSampleDataForMonth(monthKey);
+  if (!sampleData) return;
 
-  // Items
-  saveJson(itemsKey('nursery'), NURSERY_SAMPLE_ITEMS);
-  saveJson(itemsKey('elementary'), ELEMENTARY_SAMPLE_ITEMS);
-  // 献立
-  saveJson(storageKey('nursery', 'meals'), NURSERY_MEAL_SAMPLE);
-  saveJson(storageKey('elementary', 'meals'), ELEMENTARY_MEAL_SAMPLE);
-  // 時間割
-  saveJson(storageKey('elementary', 'timetable'), TIMETABLE_SAMPLE);
-  // 宿題
-  saveJson(storageKey('elementary', 'homework'), HOMEWORK_SAMPLE);
+  const seededMonths = loadJson<string[]>(SEEDED_MONTHS_KEY, []);
 
-  localStorage.setItem(SEEDED_KEY, SEEDED_VERSION);
+  saveJson(itemsKey('nursery'), mergeItems(loadItems('nursery'), sampleData.nurseryItems));
+  saveJson(itemsKey('elementary'), mergeItems(loadItems('elementary'), sampleData.elementaryItems));
+  saveJson(storageKey('nursery', 'meals'), mergeMeals(loadMealMenus('nursery'), sampleData.nurseryMeals));
+  saveJson(storageKey('elementary', 'meals'), mergeMeals(loadMealMenus('elementary'), sampleData.elementaryMeals));
+
+  const currentTimetable = loadTimetable();
+  if (isEmptyTimetable(currentTimetable)) {
+    saveJson(storageKey('elementary', 'timetable'), sampleData.timetable);
+  }
+
+  saveJson(storageKey('elementary', 'homework'), mergeHomework(loadHomework(), sampleData.homework));
+  if (!seededMonths.includes(monthKey)) {
+    localStorage.setItem(SEEDED_MONTHS_KEY, JSON.stringify([...seededMonths, monthKey]));
+  }
 }
 
 // 献立

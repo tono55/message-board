@@ -9,7 +9,6 @@ import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Calendar from '@/components/Calendar';
 import Board from '@/components/Board';
-import UpcomingEvents from '@/components/UpcomingEvents';
 import Footer from '@/components/Footer';
 import AddModal from '@/components/AddModal';
 import DetailModal from '@/components/DetailModal';
@@ -136,7 +135,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-14">
       <Navbar mode={mode} onModeChange={handleModeChange} onAddClick={() => setShowAddModal(true)} />
       <Hero
         items={currentItems}
@@ -153,13 +152,13 @@ export default function Home() {
         />
       )}
 
-      <UpcomingEvents items={allItems} />
       <Calendar
         items={allItems}
         currentMonth={currentMonth}
         selectedDate={selectedDate}
         onSelectDate={handleSelectDate}
         onChangeMonth={handleChangeMonth}
+        onItemClick={setDetailItem}
       />
 
       {!isNursery && (

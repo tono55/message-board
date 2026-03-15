@@ -1,10 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { Item } from '@/lib/types';
-import { getMonthDays, getTwoWeekDays, getWeekStart, toDateString, CATEGORY_COLORS } from '@/lib/utils';
+import { Item, SchoolMode } from '@/lib/types';
+import { getMonthDays, getTwoWeekDays, getWeekStart, toDateString, CATEGORY_COLORS, trimLeadingDateLabel, formatDate, daysUntil } from '@/lib/utils';
 
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
+const MODE_BADGE: Record<string, string> = {
+  nursery: 'bg-orange-100 text-orange-600',
+  elementary: 'bg-blue-100 text-blue-600',
+};
+const MODE_LABEL: Record<string, string> = {
+  nursery: '保育園',
+  elementary: '小学校',
+};
+const MODE_FILTER_OPTIONS: { value: SchoolMode | ''; label: string }[] = [
+  { value: '', label: 'すべて' },
+  { value: 'nursery', label: '保育園' },
+  { value: 'elementary', label: '小学校' },
+];
 
 type CalendarView = '2weeks' | 'month';
 
@@ -14,16 +27,19 @@ interface CalendarProps {
   selectedDate: string;
   onSelectDate: (date: string) => void;
   onChangeMonth: (delta: number) => void;
+  onItemClick: (item: Item) => void;
 }
 
-export default function Calendar({ items, currentMonth, selectedDate, onSelectDate, onChangeMonth }: CalendarProps) {
+export default function Calendar({ items, currentMonth, selectedDate, onSelectDate, onChangeMonth, onItemClick }: CalendarProps) {
   const [view, setView] = useState<CalendarView>('2weeks');
   const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart(new Date()));
+  const [modeFilter, setModeFilter] = useState<SchoolMode | ''>('');
 
   const todayStr = toDateString(new Date());
+  const visibleItems = modeFilter ? items.filter(item => item.mode === modeFilter) : items;
 
   const itemsByDate: Record<string, Item[]> = {};
-  for (const item of items) {
+  for (const item of visibleItems) {
     if (item.date) {
       if (!itemsByDate[item.date]) itemsByDate[item.date] = [];
       itemsByDate[item.date].push(item);
@@ -117,9 +133,9 @@ export default function Calendar({ items, currentMonth, selectedDate, onSelectDa
               <div
                 key={j}
                 className={`text-[10px] leading-tight px-1 py-0.5 rounded truncate ${colors.pill} ${item.done ? 'opacity-40 line-through' : ''}`}
-                title={item.title}
+                title={trimLeadingDateLabel(item.title)}
               >
-                {item.title}
+                {trimLeadingDateLabel(item.title)}
               </div>
             );
           })}
@@ -157,6 +173,15 @@ export default function Calendar({ items, currentMonth, selectedDate, onSelectDa
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const monthDays = getMonthDays(year, month);
+  const focusedDate = selectedDate || todayStr;
+  const focusedItems = [...(itemsByDate[focusedDate] || [])].sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return a.title.localeCompare(b.title);
+  });
+  const actionableItems = visibleItems.filter(item => !item.done && item.date && daysUntil(item.date) >= 0);
+  const todayCount = actionableItems.filter(item => item.date === todayStr).length;
+  const soonCount = actionableItems.filter(item => daysUntil(item.date) <= 3).length;
+  const nextUpcoming = [...actionableItems].sort((a, b) => a.date.localeCompare(b.date))[0] ?? null;
 
   return (
     <section id="calendar" className="max-w-5xl mx-auto px-4 py-8">
@@ -203,6 +228,50 @@ export default function Calendar({ items, currentMonth, selectedDate, onSelectDa
           </button>
         </div>
 
+        <div className="flex flex-wrap gap-2 mb-3">
+          {MODE_FILTER_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setModeFilter(opt.value)}
+              className={`text-xs px-3 py-1 rounded-full border transition-colors cursor-pointer ${
+                modeFilter === opt.value
+                  ? opt.value === 'nursery'
+                    ? 'bg-orange-500 border-orange-500 text-white'
+                    : opt.value === 'elementary'
+                    ? 'bg-blue-500 border-blue-500 text-white'
+                    : 'bg-gray-800 border-gray-800 text-white'
+                  : 'bg-white border-gray-300 text-gray-500 hover:border-gray-400'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          <button
+            onClick={() => onSelectDate(todayStr)}
+            className="px-3 py-2 rounded-full bg-green-50 text-green-700 text-xs font-medium hover:bg-green-100 transition-colors cursor-pointer"
+          >
+            今日 {todayCount}件
+          </button>
+          <button
+            onClick={() => onSelectDate(nextUpcoming?.date ?? todayStr)}
+            className="px-3 py-2 rounded-full bg-amber-50 text-amber-700 text-xs font-medium hover:bg-amber-100 transition-colors cursor-pointer"
+          >
+            3日以内 {soonCount}件
+          </button>
+          {nextUpcoming && (
+            <button
+              onClick={() => onSelectDate(nextUpcoming.date)}
+              className="px-3 py-2 rounded-full bg-blue-50 text-blue-700 text-xs font-medium hover:bg-blue-100 transition-colors cursor-pointer"
+              title={trimLeadingDateLabel(nextUpcoming.title)}
+            >
+              次の予定 {formatDate(nextUpcoming.date)}
+            </button>
+          )}
+        </div>
+
         {/* 曜日ヘッダー */}
         <div className="grid grid-cols-7 gap-1 mb-1">
           {WEEKDAYS.map((w, i) => (
@@ -231,6 +300,58 @@ export default function Calendar({ items, currentMonth, selectedDate, onSelectDa
             {monthDays.map((d, i) => renderMonthCell(d, i, d.getMonth() === month))}
           </div>
         )}
+
+        <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50/70 p-3 md:p-4">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div>
+              <p className="text-[11px] tracking-wide text-gray-400">
+                {selectedDate ? '選択中の日付' : '今日の予定'}
+              </p>
+              <h3 className="text-sm md:text-base font-semibold text-gray-800">{formatDate(focusedDate)}</h3>
+            </div>
+            <span className="text-[10px] text-gray-400">日付をタップで切替</span>
+          </div>
+
+          {focusedItems.length === 0 ? (
+            <p className="text-xs text-gray-400 py-2">予定はありません</p>
+          ) : (
+            <div className="grid gap-2 md:grid-cols-2">
+              {focusedItems.slice(0, 5).map(item => {
+                const colors = CATEGORY_COLORS[item.cat];
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onItemClick(item)}
+                    className={`rounded-lg px-2.5 py-2 text-left transition-shadow hover:shadow-sm cursor-pointer ${colors.bg} ${item.done ? 'opacity-50' : ''}`}
+                  >
+                    <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                      <span className={`inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-full ${colors.pill}`}>
+                        {item.cat}
+                      </span>
+                      <span className={`inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-full ${MODE_BADGE[item.mode] ?? 'bg-gray-100 text-gray-500'}`}>
+                        {MODE_LABEL[item.mode] ?? item.mode}
+                      </span>
+                      {item.done && (
+                        <span className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-500">
+                          対応済み
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-xs leading-snug text-gray-800 ${item.done ? 'line-through' : ''}`}>
+                      {trimLeadingDateLabel(item.title)}
+                    </p>
+                    {item.memo && (
+                      <p className="text-[11px] leading-snug text-gray-500 mt-1 line-clamp-2">{item.memo}</p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {focusedItems.length > 5 && (
+            <p className="text-[11px] text-gray-400 pt-2">ほか {focusedItems.length - 5} 件</p>
+          )}
+        </div>
       </div>
     </section>
   );

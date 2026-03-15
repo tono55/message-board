@@ -73,7 +73,7 @@ export default function MealMenuSection({ menus, mode, onUpsert, onDelete }: Pro
           return (
             <div key={dateStr} className="border border-gray-200 rounded-xl overflow-hidden">
               <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col">
                   <span className="font-medium text-sm">{WEEKDAY_LABELS[weekday]}</span>
                   <span className="text-xs text-gray-400">{dateStr.slice(5)}</span>
                 </div>

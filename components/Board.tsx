@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Item, Category, SchoolMode } from '@/lib/types';
-import { CATEGORY_COLORS } from '@/lib/utils';
+import { CATEGORY_COLORS, daysUntil } from '@/lib/utils';
 import Card from './Card';
 
 interface BoardProps {
@@ -19,6 +19,12 @@ const MODE_FILTER_OPTIONS: { value: SchoolMode | ''; label: string }[] = [
   { value: 'elementary', label: '小学校' },
 ];
 
+const STATUS_FILTER_OPTIONS = [
+  { value: '', label: 'すべて' },
+  { value: 'open', label: '未対応' },
+  { value: 'done', label: '対応済み' },
+] as const;
+
 // 両モードのカテゴリをユニークに集める
 function getAllCategories(items: Item[]): Category[] {
   const seen = new Set<Category>();
@@ -34,11 +40,15 @@ function getAllCategories(items: Item[]): Category[] {
 
 export default function Board({ items, selectedDate, selectedCat, onSelectCat, onCardClick }: BoardProps) {
   const [modeFilter, setModeFilter] = useState<SchoolMode | ''>('');
+  const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTER_OPTIONS)[number]['value']>('');
 
   const allCategories = getAllCategories(items);
 
   const filtered = items.filter(item => {
+    if (item.date && daysUntil(item.date) < 0) return false;
     if (modeFilter && item.mode !== modeFilter) return false;
+    if (statusFilter === 'open' && item.done) return false;
+    if (statusFilter === 'done' && !item.done) return false;
     if (selectedDate && item.date !== selectedDate) return false;
     if (selectedCat && item.cat !== selectedCat) return false;
     return true;
@@ -54,27 +64,50 @@ export default function Board({ items, selectedDate, selectedCat, onSelectCat, o
 
   return (
     <section id="board" className="max-w-5xl mx-auto px-4 py-8">
-      <h2 className="text-lg font-bold mb-4">掲示板</h2>
+      <h2 className="text-lg font-bold mb-4">予定一覧</h2>
 
-      {/* モードフィルター */}
-      <div className="flex items-center gap-2 mb-3">
-        {MODE_FILTER_OPTIONS.map(opt => (
-          <button
-            key={opt.value}
-            onClick={() => setModeFilter(opt.value)}
-            className={`text-xs px-3 py-1 rounded-full border transition-colors cursor-pointer ${
-              modeFilter === opt.value
-                ? opt.value === 'nursery'
-                  ? 'bg-orange-500 border-orange-500 text-white'
-                  : opt.value === 'elementary'
-                  ? 'bg-blue-500 border-blue-500 text-white'
-                  : 'bg-gray-800 border-gray-800 text-white'
-                : 'bg-white border-gray-300 text-gray-500 hover:border-gray-400'
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
+      <div className="grid gap-3 mb-4 md:grid-cols-2">
+        <div className="rounded-xl border border-gray-100 bg-white p-3">
+          <p className="text-[11px] font-medium tracking-wide text-gray-400 mb-2">学校区分</p>
+          <div className="flex flex-wrap gap-2">
+            {MODE_FILTER_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setModeFilter(opt.value)}
+                className={`text-xs px-3 py-1 rounded-full border transition-colors cursor-pointer ${
+                  modeFilter === opt.value
+                    ? opt.value === 'nursery'
+                      ? 'bg-orange-500 border-orange-500 text-white'
+                      : opt.value === 'elementary'
+                      ? 'bg-blue-500 border-blue-500 text-white'
+                      : 'bg-gray-800 border-gray-800 text-white'
+                    : 'bg-white border-gray-300 text-gray-500 hover:border-gray-400'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-gray-100 bg-white p-3">
+          <p className="text-[11px] font-medium tracking-wide text-gray-400 mb-2">状態</p>
+          <div className="flex flex-wrap gap-2">
+            {STATUS_FILTER_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setStatusFilter(opt.value)}
+                className={`text-xs px-3 py-1 rounded-full border transition-colors cursor-pointer ${
+                  statusFilter === opt.value
+                    ? 'bg-gray-800 border-gray-800 text-white'
+                    : 'bg-white border-gray-300 text-gray-500 hover:border-gray-400'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* カテゴリフィルター */}

@@ -33,6 +33,12 @@ export function formatDate(dateStr: string): string {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
+export function trimLeadingDateLabel(title: string): string {
+  return title
+    .replace(/^\d{1,2}月\d{1,2}日(?:（[^）]+）|\([^)]+\)|\s*[月火水木金土日])?\s*/u, '')
+    .trim();
+}
+
 export function daysUntil(dateStr: string): number {
   if (!dateStr) return Infinity;
   const today = new Date();

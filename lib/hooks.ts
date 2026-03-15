@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { SchoolMode, MealMenu, Timetable, PickupRecord, HomeworkEntry, HealthRecord } from './types';
 import {
   loadMealMenus, saveMealMenus,
@@ -13,14 +13,19 @@ import { generateId, todayString } from './utils';
 
 export function useMealMenus(mode: SchoolMode, loaded: boolean) {
   const [menus, setMenus] = useState<MealMenu[]>([]);
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
     if (!loaded) return;
-    queueMicrotask(() => setMenus(loadMealMenus(mode)));
+    hydratedRef.current = false;
+    queueMicrotask(() => {
+      setMenus(loadMealMenus(mode));
+      hydratedRef.current = true;
+    });
   }, [mode, loaded]);
 
   useEffect(() => {
-    if (loaded) saveMealMenus(mode, menus);
+    if (loaded && hydratedRef.current) saveMealMenus(mode, menus);
   }, [menus, loaded, mode]);
 
   const upsertMenu = useCallback((menu: MealMenu) => {
@@ -44,14 +49,19 @@ export function useMealMenus(mode: SchoolMode, loaded: boolean) {
 
 export function useTimetable(loaded: boolean) {
   const [timetable, setTimetable] = useState<Timetable>({ mon: [], tue: [], wed: [], thu: [], fri: [] });
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
     if (!loaded) return;
-    queueMicrotask(() => setTimetable(loadTimetable()));
+    hydratedRef.current = false;
+    queueMicrotask(() => {
+      setTimetable(loadTimetable());
+      hydratedRef.current = true;
+    });
   }, [loaded]);
 
   useEffect(() => {
-    if (loaded) saveTimetable(timetable);
+    if (loaded && hydratedRef.current) saveTimetable(timetable);
   }, [timetable, loaded]);
 
   const updateTimetable = useCallback((newTimetable: Timetable) => {
@@ -63,14 +73,19 @@ export function useTimetable(loaded: boolean) {
 
 export function usePickups(loaded: boolean) {
   const [pickups, setPickups] = useState<PickupRecord[]>([]);
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
     if (!loaded) return;
-    queueMicrotask(() => setPickups(loadPickups()));
+    hydratedRef.current = false;
+    queueMicrotask(() => {
+      setPickups(loadPickups());
+      hydratedRef.current = true;
+    });
   }, [loaded]);
 
   useEffect(() => {
-    if (loaded) savePickups(pickups);
+    if (loaded && hydratedRef.current) savePickups(pickups);
   }, [pickups, loaded]);
 
   const addPickup = useCallback((record: Omit<PickupRecord, 'date'> & { date?: string }) => {
@@ -89,14 +104,19 @@ export function usePickups(loaded: boolean) {
 
 export function useHomework(loaded: boolean) {
   const [homework, setHomework] = useState<HomeworkEntry[]>([]);
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
     if (!loaded) return;
-    queueMicrotask(() => setHomework(loadHomework()));
+    hydratedRef.current = false;
+    queueMicrotask(() => {
+      setHomework(loadHomework());
+      hydratedRef.current = true;
+    });
   }, [loaded]);
 
   useEffect(() => {
-    if (loaded) saveHomework(homework);
+    if (loaded && hydratedRef.current) saveHomework(homework);
   }, [homework, loaded]);
 
   const addHomework = useCallback((entry: Omit<HomeworkEntry, 'id' | 'done'>) => {
@@ -117,14 +137,19 @@ export function useHomework(loaded: boolean) {
 
 export function useHealthRecords(loaded: boolean) {
   const [records, setRecords] = useState<HealthRecord[]>([]);
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
     if (!loaded) return;
-    queueMicrotask(() => setRecords(loadHealthRecords()));
+    hydratedRef.current = false;
+    queueMicrotask(() => {
+      setRecords(loadHealthRecords());
+      hydratedRef.current = true;
+    });
   }, [loaded]);
 
   useEffect(() => {
-    if (loaded) saveHealthRecords(records);
+    if (loaded && hydratedRef.current) saveHealthRecords(records);
   }, [records, loaded]);
 
   const upsertRecord = useCallback((record: HealthRecord) => {

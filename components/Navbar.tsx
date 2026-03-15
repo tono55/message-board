@@ -32,7 +32,7 @@ export default function Navbar({ mode, onModeChange, onAddClick }: NavbarProps) 
   const links = NAV_LINKS[mode];
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+    <nav className="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
       <div className="max-w-5xl mx-auto px-3 sm:px-4 h-14 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <span className="font-serif text-base sm:text-xl font-bold tracking-wide text-gray-800 whitespace-nowrap">
