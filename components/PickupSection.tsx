@@ -46,7 +46,7 @@ export default function PickupSection({ pickups, onAdd }: Props) {
       </div>
 
       {/* 今週の一覧 */}
-      <div className="grid grid-cols-5 gap-1 sm:gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-1 sm:gap-2">
         {weekDates.map(({ weekday, dateStr }) => {
           const pickup = pickups.find(p => p.date === dateStr);
           const isToday = dateStr === today;
