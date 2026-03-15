@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Item, SchoolMode } from '@/lib/types';
 import { getMonthDays, getTwoWeekDays, getWeekStart, toDateString, CATEGORY_COLORS, trimLeadingDateLabel, formatDate, daysUntil } from '@/lib/utils';
 
@@ -23,6 +23,7 @@ type CalendarView = '2weeks' | 'month';
 
 interface CalendarProps {
   items: Item[];
+  mode: SchoolMode;
   currentMonth: Date;
   selectedDate: string;
   onSelectDate: (date: string) => void;
@@ -30,10 +31,14 @@ interface CalendarProps {
   onItemClick: (item: Item) => void;
 }
 
-export default function Calendar({ items, currentMonth, selectedDate, onSelectDate, onChangeMonth, onItemClick }: CalendarProps) {
+export default function Calendar({ items, mode, currentMonth, selectedDate, onSelectDate, onChangeMonth, onItemClick }: CalendarProps) {
   const [view, setView] = useState<CalendarView>('2weeks');
   const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart(new Date()));
-  const [modeFilter, setModeFilter] = useState<SchoolMode | ''>('');
+  const [modeFilter, setModeFilter] = useState<SchoolMode | ''>(mode);
+
+  useEffect(() => {
+    setModeFilter(mode);
+  }, [mode]);
 
   const todayStr = toDateString(new Date());
   const visibleItems = modeFilter ? items.filter(item => item.mode === modeFilter) : items;

@@ -154,6 +154,7 @@ export default function Home() {
 
       <Calendar
         items={allItems}
+        mode={mode}
         currentMonth={currentMonth}
         selectedDate={selectedDate}
         onSelectDate={handleSelectDate}
