@@ -181,6 +181,14 @@ export default function Home() {
         onItemClick={setDetailItem}
       />
 
+      <Board
+        items={allItems}
+        mode={mode}
+        selectedCat={selectedCat}
+        onSelectCat={setSelectedCat}
+        onCardClick={setDetailItem}
+      />
+
       {!isNursery && (
         <TimetableSection
           timetable={timetable}
@@ -199,15 +207,6 @@ export default function Home() {
         onResetWeek={handleResetWeekView}
         onUpsert={upsertMenu}
         onDelete={deleteMenu}
-      />
-
-      <Board
-        items={allItems}
-        mode={mode}
-        selectedDate={selectedDate}
-        selectedCat={selectedCat}
-        onSelectCat={setSelectedCat}
-        onCardClick={setDetailItem}
       />
       <Footer />
 

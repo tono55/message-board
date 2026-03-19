@@ -123,26 +123,26 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
     const isSat = dayOfWeek === 6;
 
     return (
-      <div
+      <button
         key={key}
+        type="button"
+        onClick={() => handleDateFocus(dateStr)}
         className={`
+          w-full text-left
           rounded-lg border transition-colors
           ${isToday ? 'border-accent-green bg-accent-green/5' : isSelected ? 'border-accent-green' : 'border-gray-100'}
           ${isSun ? 'bg-red-50/40' : isSat ? 'bg-blue-50/40' : 'bg-white'}
         `}
       >
         {/* 日付ヘッダー行 */}
-        <button
-          onClick={() => handleDateFocus(dateStr)}
-          className="w-full text-left px-2 pt-1.5 pb-1 cursor-pointer"
-        >
+        <div className="w-full text-left px-2 pt-1.5 pb-1">
           <span className={`
             text-xs font-bold inline-flex items-center justify-center w-6 h-6 rounded-full
             ${isToday ? 'bg-accent-green text-white' : isSun ? 'text-red-500' : isSat ? 'text-blue-500' : 'text-gray-700'}
           `}>
             {d.getDate()}
           </span>
-        </button>
+        </div>
 
         {/* 予定リスト（デスクトップ: タイトル表示） */}
         <div className="hidden sm:block px-1 pb-1.5 space-y-0.5 min-h-[2rem]">
@@ -171,7 +171,7 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
             <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
           )}
         </div>
-      </div>
+      </button>
     );
   };
 

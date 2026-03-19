@@ -8,7 +8,6 @@ import Card from './Card';
 interface BoardProps {
   items: Item[];
   mode: SchoolMode;
-  selectedDate: string;
   selectedCat: Category | '';
   onSelectCat: (cat: Category | '') => void;
   onCardClick: (item: Item) => void;
@@ -39,7 +38,7 @@ function getAllCategories(items: Item[]): Category[] {
   return result;
 }
 
-export default function Board({ items, mode, selectedDate, selectedCat, onSelectCat, onCardClick }: BoardProps) {
+export default function Board({ items, mode, selectedCat, onSelectCat, onCardClick }: BoardProps) {
   const [modeFilter, setModeFilter] = useState<SchoolMode | ''>(mode);
   const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTER_OPTIONS)[number]['value']>('');
 
@@ -54,7 +53,6 @@ export default function Board({ items, mode, selectedDate, selectedCat, onSelect
     if (modeFilter && item.mode !== modeFilter) return false;
     if (statusFilter === 'open' && item.done) return false;
     if (statusFilter === 'done' && !item.done) return false;
-    if (selectedDate && item.date !== selectedDate) return false;
     if (selectedCat && item.cat !== selectedCat) return false;
     return true;
   });
@@ -141,16 +139,10 @@ export default function Board({ items, mode, selectedDate, selectedCat, onSelect
         })}
       </div>
 
-      {selectedDate && (
-        <p className="text-xs text-gray-400 mb-3">
-          {selectedDate} の予定を表示中
-        </p>
-      )}
-
       <div className="grid gap-2">
         {sorted.length === 0 ? (
           <div className="text-center py-12 text-gray-400 text-sm">
-            {selectedDate || selectedCat || modeFilter ? '該当するおたよりはありません' : 'おたよりを追加してみましょう'}
+            {selectedCat || modeFilter || statusFilter ? '該当するおたよりはありません' : 'おたよりを追加してみましょう'}
           </div>
         ) : (
           sorted.map(item => (
