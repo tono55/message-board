@@ -24,6 +24,15 @@ export interface MealMenu {
   memo?: string;
 }
 
+export interface UpdateHistoryEntry {
+  id: string;
+  timestamp: string;
+  title: string;
+  summary: string;
+  mode?: SchoolMode;
+  relatedDates?: string[];
+}
+
 // 時間割（小学校のみ）
 export type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri';
 export interface TimetableEntry { subject: string; note?: string; }

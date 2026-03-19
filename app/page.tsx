@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Item, Category, SchoolMode } from '@/lib/types';
-import { loadItems, saveItems, loadMode, saveMode, seedSampleData } from '@/lib/storage';
+import { Item, Category, SchoolMode, UpdateHistoryEntry } from '@/lib/types';
+import { loadItems, saveItems, loadMode, saveMode, seedSampleData, loadUpdateHistory } from '@/lib/storage';
 import { generateId, getCategoriesForMode, todayString } from '@/lib/utils';
 import { useMealMenus, useTimetable } from '@/lib/hooks';
 import Navbar from '@/components/Navbar';
@@ -14,6 +14,7 @@ import AddModal from '@/components/AddModal';
 import DetailModal from '@/components/DetailModal';
 import MealMenuSection from '@/components/MealMenuSection';
 import TimetableSection from '@/components/TimetableSection';
+import UpdateHistorySection from '@/components/UpdateHistorySection';
 
 function toWeekViewDate(dateStr?: string): Date {
   const base = dateStr ? new Date(`${dateStr}T00:00:00`) : new Date();
@@ -35,6 +36,7 @@ export default function Home() {
   const [weekViewDate, setWeekViewDate] = useState<Date>(() => toWeekViewDate());
   const [showAddModal, setShowAddModal] = useState(false);
   const [detailItem, setDetailItem] = useState<Item | null>(null);
+  const [updateHistory, setUpdateHistory] = useState<UpdateHistoryEntry[]>([]);
 
   const categories = getCategoriesForMode(mode);
   // 掲示板用: 両モードをマージ
@@ -70,12 +72,14 @@ export default function Home() {
     const savedMode = loadMode();
     const nursery = loadItems('nursery');
     const elementary = loadItems('elementary');
+    const history = loadUpdateHistory();
 
     queueMicrotask(() => {
       if (cancelled) return;
       setMode(savedMode);
       setNurseryItems(nursery);
       setElementaryItems(elementary);
+      setUpdateHistory(history);
       setLoaded(true);
     });
 
@@ -170,6 +174,7 @@ export default function Home() {
     <div className="min-h-screen bg-background pt-14">
       <Navbar mode={mode} onModeChange={handleModeChange} onAddClick={() => setShowAddModal(true)} />
       <Hero items={currentItems} mode={mode} />
+      <UpdateHistorySection entries={updateHistory} />
 
       <Calendar
         items={allItems}

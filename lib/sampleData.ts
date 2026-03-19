@@ -1,4 +1,4 @@
-import { Item, MealMenu, Timetable } from './types';
+import { Item, MealMenu, Timetable, UpdateHistoryEntry } from './types';
 
 export interface SampleDataSet {
   nurseryItems: Item[];
@@ -303,6 +303,35 @@ const SAMPLE_DATA_BY_MONTH: Record<string, SampleDataSet> = {
   '2026-04': APRIL_SAMPLE_DATA,
 };
 
+const SAMPLE_UPDATE_HISTORY_BY_MONTH: Record<string, UpdateHistoryEntry[]> = {
+  '2026-03': [
+    {
+      id: 'seed-history-2026-03-overview',
+      timestamp: '2026-03-16T09:00:00+09:00',
+      title: '3月のサンプルデータを反映',
+      summary: '保育園のおたより・献立と、小学校の予定・献立を追加しました。',
+      relatedDates: ['2026-03-02', '2026-03-31'],
+    },
+    {
+      id: 'seed-history-2026-03-week-program',
+      timestamp: '2026-03-20T09:00:00+09:00',
+      title: '小学校の週プログラムを反映',
+      summary: '2026/03/23-03/25 の予定と時間割を追加しました。',
+      mode: 'elementary',
+      relatedDates: ['2026-03-23', '2026-03-24', '2026-03-25'],
+    },
+  ],
+  '2026-04': [
+    {
+      id: 'seed-history-2026-04-overview',
+      timestamp: '2026-04-01T09:00:00+09:00',
+      title: '4月のサンプルデータを反映',
+      summary: '保育園と小学校の4月データを追加しました。',
+      relatedDates: ['2026-04-01', '2026-04-30'],
+    },
+  ],
+};
+
 export function getSampleMonthKey(baseDate = new Date()): string {
   const year = baseDate.getFullYear();
   const month = String(baseDate.getMonth() + 1).padStart(2, '0');
@@ -311,4 +340,8 @@ export function getSampleMonthKey(baseDate = new Date()): string {
 
 export function getSampleDataForMonth(monthKey: string): SampleDataSet | null {
   return SAMPLE_DATA_BY_MONTH[monthKey] ?? null;
+}
+
+export function getSampleUpdateHistoryForMonth(monthKey: string): UpdateHistoryEntry[] {
+  return SAMPLE_UPDATE_HISTORY_BY_MONTH[monthKey] ?? [];
 }

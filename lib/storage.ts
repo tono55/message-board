@@ -1,6 +1,7 @@
-import { Item, SchoolMode, MealMenu, Timetable, PickupRecord, HealthRecord } from './types';
+import { Item, SchoolMode, MealMenu, Timetable, PickupRecord, HealthRecord, UpdateHistoryEntry } from './types';
 import {
   getSampleDataForMonth,
+  getSampleUpdateHistoryForMonth,
   getSampleMonthKey,
 } from './sampleData';
 
@@ -11,6 +12,7 @@ function itemsKey(mode: SchoolMode): string {
 }
 
 const MODE_KEY = `${STORAGE_PREFIX}-mode`;
+const UPDATE_HISTORY_KEY = `${STORAGE_PREFIX}-update-history`;
 
 function storageKey(mode: SchoolMode, feature: string): string {
   return `${STORAGE_PREFIX}-${mode}-${feature}`;
@@ -29,6 +31,15 @@ function loadJson<T>(key: string, fallback: T): T {
 function saveJson<T>(key: string, data: T): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(key, JSON.stringify(data));
+}
+
+function sortUpdateHistory(entries: UpdateHistoryEntry[]): UpdateHistoryEntry[] {
+  return [...entries].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+}
+
+function mergeUpdateHistory(existing: UpdateHistoryEntry[], incoming: UpdateHistoryEntry[]): UpdateHistoryEntry[] {
+  const existingIds = new Set(existing.map(entry => entry.id));
+  return sortUpdateHistory([...existing, ...incoming.filter(entry => !existingIds.has(entry.id))]);
 }
 
 function dedupeItems(items: Item[]): Item[] {
@@ -119,6 +130,11 @@ export function seedSampleData(): void {
     saveJson(storageKey('elementary', 'timetable'), sampleData.timetable);
   }
 
+  const seededHistory = getSampleUpdateHistoryForMonth(monthKey);
+  if (seededHistory.length > 0) {
+    saveUpdateHistory(mergeUpdateHistory(loadUpdateHistory(), seededHistory));
+  }
+
   if (!seededMonths.includes(monthKey)) {
     localStorage.setItem(SEEDED_MONTHS_KEY, JSON.stringify([...seededMonths, monthKey]));
   }
@@ -139,6 +155,19 @@ export function loadTimetable(): Timetable {
 }
 export function saveTimetable(timetable: Timetable): void {
   saveJson(storageKey('elementary', 'timetable'), timetable);
+}
+
+// 更新履歴
+export function loadUpdateHistory(): UpdateHistoryEntry[] {
+  return sortUpdateHistory(loadJson(UPDATE_HISTORY_KEY, [] as UpdateHistoryEntry[]));
+}
+export function saveUpdateHistory(entries: UpdateHistoryEntry[]): void {
+  saveJson(UPDATE_HISTORY_KEY, sortUpdateHistory(entries));
+}
+export function addUpdateHistory(entry: Omit<UpdateHistoryEntry, 'id' | 'timestamp'> & { id?: string; timestamp?: string }): void {
+  const timestamp = entry.timestamp ?? new Date().toISOString();
+  const id = entry.id ?? `history-${timestamp}-${Math.random().toString(36).slice(2, 8)}`;
+  saveUpdateHistory([{ ...entry, id, timestamp }, ...loadUpdateHistory()]);
 }
 
 // お迎え
