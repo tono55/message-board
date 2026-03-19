@@ -1,4 +1,4 @@
-import { Item, SchoolMode, MealMenu, Timetable, PickupRecord, HomeworkEntry, HealthRecord } from './types';
+import { Item, SchoolMode, MealMenu, Timetable, PickupRecord, HealthRecord } from './types';
 import {
   getSampleDataForMonth,
   getSampleMonthKey,
@@ -97,11 +97,6 @@ function mergeMeals(existing: MealMenu[], incoming: MealMenu[]): MealMenu[] {
   return [...merged, ...incoming.filter(menu => !existingDates.has(menu.date))];
 }
 
-function mergeHomework(existing: HomeworkEntry[], incoming: HomeworkEntry[]): HomeworkEntry[] {
-  const existingIds = new Set(existing.map(entry => entry.id));
-  return [...existing, ...incoming.filter(entry => !existingIds.has(entry.id))];
-}
-
 function isEmptyTimetable(timetable: Timetable): boolean {
   return Object.values(timetable).every(entries => entries.length === 0);
 }
@@ -124,7 +119,6 @@ export function seedSampleData(): void {
     saveJson(storageKey('elementary', 'timetable'), sampleData.timetable);
   }
 
-  saveJson(storageKey('elementary', 'homework'), mergeHomework(loadHomework(), sampleData.homework));
   if (!seededMonths.includes(monthKey)) {
     localStorage.setItem(SEEDED_MONTHS_KEY, JSON.stringify([...seededMonths, monthKey]));
   }
@@ -153,14 +147,6 @@ export function loadPickups(): PickupRecord[] {
 }
 export function savePickups(records: PickupRecord[]): void {
   saveJson(storageKey('nursery', 'pickups'), records);
-}
-
-// 宿題
-export function loadHomework(): HomeworkEntry[] {
-  return loadJson(storageKey('elementary', 'homework'), []);
-}
-export function saveHomework(entries: HomeworkEntry[]): void {
-  saveJson(storageKey('elementary', 'homework'), entries);
 }
 
 // 体調記録

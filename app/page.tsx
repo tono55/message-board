@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Item, Category, SchoolMode } from '@/lib/types';
 import { loadItems, saveItems, loadMode, saveMode, seedSampleData } from '@/lib/storage';
 import { generateId, getCategoriesForMode, todayString } from '@/lib/utils';
-import { useMealMenus, useTimetable, useHomework } from '@/lib/hooks';
+import { useMealMenus, useTimetable } from '@/lib/hooks';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Calendar from '@/components/Calendar';
@@ -14,7 +14,6 @@ import AddModal from '@/components/AddModal';
 import DetailModal from '@/components/DetailModal';
 import MealMenuSection from '@/components/MealMenuSection';
 import TimetableSection from '@/components/TimetableSection';
-import HomeworkSection from '@/components/HomeworkSection';
 
 function toWeekViewDate(dateStr?: string): Date {
   const base = dateStr ? new Date(`${dateStr}T00:00:00`) : new Date();
@@ -43,11 +42,9 @@ export default function Home() {
 
   const { menus, upsertMenu, deleteMenu } = useMealMenus(mode, loaded);
   const { timetable, updateTimetable } = useTimetable(loaded);
-  const { homework, addHomework, toggleHomework, deleteHomework } = useHomework(loaded);
 
   const isNursery = mode === 'nursery';
   const today = todayString();
-  const todayHomework = homework.filter(h => h.date === today);
   // Hero の統計は現在モードのアイテムで計算
   const currentItems = isNursery ? nurseryItems : elementaryItems;
   const defaultWeekViewDate = useMemo(() => {
@@ -172,20 +169,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background pt-14">
       <Navbar mode={mode} onModeChange={handleModeChange} onAddClick={() => setShowAddModal(true)} />
-      <Hero
-        items={currentItems}
-        mode={mode}
-        todayHomework={!isNursery ? todayHomework : undefined}
-      />
-
-      {!isNursery && (
-        <HomeworkSection
-          homework={homework}
-          onAdd={addHomework}
-          onToggle={toggleHomework}
-          onDelete={deleteHomework}
-        />
-      )}
+      <Hero items={currentItems} mode={mode} />
 
       <Calendar
         items={allItems}

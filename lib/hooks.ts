@@ -1,15 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { SchoolMode, MealMenu, Timetable, PickupRecord, HomeworkEntry, HealthRecord } from './types';
+import { SchoolMode, MealMenu, Timetable, PickupRecord, HealthRecord } from './types';
 import {
   loadMealMenus, saveMealMenus,
   loadTimetable, saveTimetable,
   loadPickups, savePickups,
-  loadHomework, saveHomework,
   loadHealthRecords, saveHealthRecords,
 } from './storage';
-import { generateId, todayString } from './utils';
+import { todayString } from './utils';
 
 export function useMealMenus(mode: SchoolMode, loaded: boolean) {
   const [menus, setMenus] = useState<MealMenu[]>([]);
@@ -100,39 +99,6 @@ export function usePickups(loaded: boolean) {
   }, []);
 
   return { pickups, addPickup, deletePickup };
-}
-
-export function useHomework(loaded: boolean) {
-  const [homework, setHomework] = useState<HomeworkEntry[]>([]);
-  const hydratedRef = useRef(false);
-
-  useEffect(() => {
-    if (!loaded) return;
-    hydratedRef.current = false;
-    queueMicrotask(() => {
-      setHomework(loadHomework());
-      hydratedRef.current = true;
-    });
-  }, [loaded]);
-
-  useEffect(() => {
-    if (loaded && hydratedRef.current) saveHomework(homework);
-  }, [homework, loaded]);
-
-  const addHomework = useCallback((entry: Omit<HomeworkEntry, 'id' | 'done'>) => {
-    const newEntry: HomeworkEntry = { ...entry, id: generateId(), done: false };
-    setHomework(prev => [newEntry, ...prev]);
-  }, []);
-
-  const toggleHomework = useCallback((id: string) => {
-    setHomework(prev => prev.map(h => h.id === id ? { ...h, done: !h.done } : h));
-  }, []);
-
-  const deleteHomework = useCallback((id: string) => {
-    setHomework(prev => prev.filter(h => h.id !== id));
-  }, []);
-
-  return { homework, addHomework, toggleHomework, deleteHomework };
 }
 
 export function useHealthRecords(loaded: boolean) {

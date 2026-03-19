@@ -19,7 +19,6 @@ const NAV_LINKS: Record<SchoolMode, { label: string; href: string }[]> = {
   elementary: [
     { label: '献立', href: '#meal-menu' },
     { label: '時間割', href: '#timetable' },
-    { label: '宿題', href: '#homework' },
     { label: 'カレンダー', href: '#calendar' },
     { label: '掲示板', href: '#board' },
   ],

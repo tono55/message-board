@@ -20,6 +20,7 @@ const MODE_FILTER_OPTIONS: { value: SchoolMode | ''; label: string }[] = [
 ];
 
 type CalendarView = '2weeks' | 'month';
+type DetailView = 'date' | 'soon';
 
 interface CalendarProps {
   items: Item[];
@@ -33,12 +34,19 @@ interface CalendarProps {
 
 export default function Calendar({ items, mode, currentMonth, selectedDate, onSelectDate, onChangeMonth, onItemClick }: CalendarProps) {
   const [view, setView] = useState<CalendarView>('2weeks');
+  const [detailView, setDetailView] = useState<DetailView>(selectedDate ? 'date' : 'soon');
   const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart(new Date()));
   const [modeFilter, setModeFilter] = useState<SchoolMode | ''>(mode);
 
   useEffect(() => {
     setModeFilter(mode);
   }, [mode]);
+
+  useEffect(() => {
+    if (!selectedDate && detailView === 'date') {
+      setDetailView('soon');
+    }
+  }, [detailView, selectedDate]);
 
   const todayStr = toDateString(new Date());
   const visibleItems = modeFilter ? items.filter(item => item.mode === modeFilter) : items;
@@ -64,6 +72,12 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
     setView(v);
   };
 
+  const handleDateFocus = (dateStr: string) => {
+    const isSelected = dateStr === selectedDate;
+    onSelectDate(isSelected ? '' : dateStr);
+    setDetailView(isSelected ? 'soon' : 'date');
+  };
+
   // ─── 月ビュー用セル（コンパクト） ────────────────────────────
   const renderMonthCell = (d: Date, key: number | string, isCurrentMonth?: boolean) => {
     const dateStr = toDateString(d);
@@ -76,7 +90,7 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
     return (
       <button
         key={key}
-        onClick={() => onSelectDate(isSelected ? '' : dateStr)}
+        onClick={() => handleDateFocus(dateStr)}
         className={`
           relative p-1 min-h-[44px] md:min-h-[56px] text-sm rounded-lg transition-colors cursor-pointer
           ${dimmed ? 'text-gray-300' : dayOfWeek === 0 ? 'text-red-500' : dayOfWeek === 6 ? 'text-blue-500' : 'text-gray-700'}
@@ -119,7 +133,7 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
       >
         {/* 日付ヘッダー行 */}
         <button
-          onClick={() => onSelectDate(isSelected ? '' : dateStr)}
+          onClick={() => handleDateFocus(dateStr)}
           className="w-full text-left px-2 pt-1.5 pb-1 cursor-pointer"
         >
           <span className={`
@@ -178,13 +192,18 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const monthDays = getMonthDays(year, month);
+  const actionableItems = visibleItems.filter(item => !item.done && item.date && daysUntil(item.date) >= 0);
+  const soonItems = actionableItems
+    .filter(item => daysUntil(item.date) <= 7)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
   const focusedDate = selectedDate || todayStr;
-  const focusedItems = [...(itemsByDate[focusedDate] || [])].sort((a, b) => {
+  const selectedDateItems = [...(itemsByDate[focusedDate] || [])].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
     return a.title.localeCompare(b.title);
   });
-  const actionableItems = visibleItems.filter(item => !item.done && item.date && daysUntil(item.date) >= 0);
-  const soonCount = actionableItems.filter(item => daysUntil(item.date) <= 7).length;
+  const focusedItems = detailView === 'soon' ? soonItems : selectedDateItems;
+  const soonCount = soonItems.length;
+  const isSoonView = detailView === 'soon';
 
   return (
     <section id="calendar" className="max-w-5xl mx-auto px-4 py-8">
@@ -253,17 +272,21 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
 
         <div className="flex flex-wrap gap-2 mb-4">
           <button
-            onClick={() => onSelectDate(todayStr)}
-            className="px-3 py-2 rounded-full bg-amber-50 text-amber-700 text-xs font-medium hover:bg-amber-100 transition-colors cursor-pointer"
+            onClick={() => setDetailView('soon')}
+            className={`px-3 py-2 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+              isSoonView ? 'bg-amber-100 text-amber-800 ring-1 ring-amber-300' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+            }`}
           >
             7日以内 {soonCount}件
           </button>
           {selectedDate && (
             <button
-              onClick={() => onSelectDate('')}
-              className="px-3 py-2 rounded-full bg-gray-100 text-gray-600 text-xs font-medium hover:bg-gray-200 transition-colors cursor-pointer"
+              onClick={() => setDetailView('date')}
+              className={`px-3 py-2 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                !isSoonView ? 'bg-blue-100 text-blue-800 ring-1 ring-blue-300' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+              }`}
             >
-              選択解除
+              選択日 {formatDate(selectedDate)}
             </button>
           )}
         </div>
@@ -301,9 +324,11 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
           <div className="flex items-center justify-between gap-3 mb-3">
             <div>
               <p className="text-[11px] tracking-wide text-gray-400">
-                {selectedDate ? '選択中の日付' : '今日の予定'}
+                {isSoonView ? '7日以内の予定' : '選択中の日付'}
               </p>
-              <h3 className="text-sm md:text-base font-semibold text-gray-800">{formatDate(focusedDate)}</h3>
+              <h3 className="text-sm md:text-base font-semibold text-gray-800">
+                {isSoonView ? `直近7日 (${soonCount}件)` : formatDate(focusedDate)}
+              </h3>
             </div>
             <div className="flex items-center gap-2">
               {selectedDate && (
@@ -319,7 +344,9 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
           </div>
 
           {focusedItems.length === 0 ? (
-            <p className="text-xs text-gray-400 py-2">予定はありません</p>
+            <p className="text-xs text-gray-400 py-2">
+              {isSoonView ? '7日以内の予定はありません' : '予定はありません'}
+            </p>
           ) : (
             <div className="grid gap-2 md:grid-cols-2">
               {focusedItems.slice(0, 5).map(item => {

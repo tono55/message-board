@@ -1,4 +1,4 @@
-import { HomeworkEntry, Item, MealMenu, Timetable } from './types';
+import { Item, MealMenu, Timetable } from './types';
 
 export interface SampleDataSet {
   nurseryItems: Item[];
@@ -6,7 +6,6 @@ export interface SampleDataSet {
   nurseryMeals: MealMenu[];
   elementaryMeals: MealMenu[];
   timetable: Timetable;
-  homework: HomeworkEntry[];
 }
 
 const MARCH_SAMPLE_DATA: SampleDataSet = {
@@ -231,12 +230,6 @@ const MARCH_SAMPLE_DATA: SampleDataSet = {
     thu: [],
     fri: [],
   },
-  homework: [
-    { id: '2026-03-hw-1', date: '2026-03-16', subject: '国語', description: '自分はっけんファイルを読み返す', done: false },
-    { id: '2026-03-hw-2', date: '2026-03-16', subject: '算数', description: '2年生のまとめプリント', done: true },
-    { id: '2026-03-hw-3', date: '2026-03-18', subject: '国語', description: '2年生で学習した漢字の復習', done: false },
-    { id: '2026-03-hw-4', date: '2026-03-19', subject: '生活', description: '1年間の思い出を絵日記に書く', done: false },
-  ],
 };
 
 const APRIL_SAMPLE_DATA: SampleDataSet = {
@@ -303,11 +296,6 @@ const APRIL_SAMPLE_DATA: SampleDataSet = {
       { subject: '学活', note: '1週間のふりかえり' },
     ],
   },
-  homework: [
-    { id: '2026-04-hw-1', date: '2026-04-08', subject: '国語', description: '教科書 p.10-13 を音読', done: false },
-    { id: '2026-04-hw-2', date: '2026-04-09', subject: '算数', description: '計算ドリル p.2-3', done: false },
-    { id: '2026-04-hw-3', date: '2026-04-10', subject: '生活', description: '春見つけカードを1枚書く', done: false },
-  ],
 };
 
 const SAMPLE_DATA_BY_MONTH: Record<string, SampleDataSet> = {

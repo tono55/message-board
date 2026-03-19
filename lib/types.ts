@@ -38,15 +38,6 @@ export interface PickupRecord {
   memo?: string;
 }
 
-// 宿題（小学校のみ）
-export interface HomeworkEntry {
-  id: string;
-  date: string;
-  subject: string;      // "算数" 等
-  description: string;  // "ドリルP.24-25"
-  done: boolean;
-}
-
 // 体調記録（保育園のみ）
 export interface HealthRecord {
   date: string;

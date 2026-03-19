@@ -1,15 +1,14 @@
 'use client';
 
-import { Item, SchoolMode, HomeworkEntry } from '@/lib/types';
+import { Item, SchoolMode } from '@/lib/types';
 import { daysUntil, MODE_LABELS } from '@/lib/utils';
 
 interface HeroProps {
   items: Item[];
   mode: SchoolMode;
-  todayHomework?: HomeworkEntry[];
 }
 
-export default function Hero({ items, mode, todayHomework }: HeroProps) {
+export default function Hero({ items, mode }: HeroProps) {
   const total = items.length;
   const pending = items.filter(i => !i.done).length;
   const upcoming = items.filter(i => {
@@ -17,12 +16,6 @@ export default function Hero({ items, mode, todayHomework }: HeroProps) {
     const d = daysUntil(i.date);
     return d >= 0 && d <= 7;
   }).length;
-
-  const isNursery = mode === 'nursery';
-
-  // 宿題進捗（小学校のみ）
-  const hwTotal = todayHomework?.length || 0;
-  const hwDone = todayHomework?.filter(h => h.done).length || 0;
 
   return (
     <section className="bg-hero text-white">
@@ -42,19 +35,8 @@ export default function Hero({ items, mode, todayHomework }: HeroProps) {
             <div className="text-xs text-gray-400 mt-1">未対応</div>
           </div>
           <div className="bg-white/10 rounded-xl p-4 text-center">
-            {!isNursery && hwTotal > 0 ? (
-              <>
-                <div className={`text-2xl font-bold ${hwDone === hwTotal ? 'text-green-400' : 'text-pink-400'}`}>
-                  {hwDone}/{hwTotal}
-                </div>
-                <div className="text-xs text-gray-400 mt-1">宿題</div>
-              </>
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-pink-400">{upcoming}</div>
-                <div className="text-xs text-gray-400 mt-1">今週の予定</div>
-              </>
-            )}
+            <div className="text-2xl font-bold text-pink-400">{upcoming}</div>
+            <div className="text-xs text-gray-400 mt-1">今週の予定</div>
           </div>
         </div>
       </div>
