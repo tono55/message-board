@@ -16,6 +16,19 @@ export const CATEGORY_COLORS: Record<Category, CategoryColorSet> = {
   '持ち物': { bg: 'bg-purple-50', border: 'border-purple-400', text: 'text-purple-700', dot: 'bg-purple-400', pill: 'bg-purple-100 text-purple-700', pillActive: 'bg-purple-500 text-white' },
 };
 
+const FALLBACK_CATEGORY_COLOR: CategoryColorSet = {
+  bg: 'bg-gray-50',
+  border: 'border-gray-300',
+  text: 'text-gray-700',
+  dot: 'bg-gray-400',
+  pill: 'bg-gray-100 text-gray-700',
+  pillActive: 'bg-gray-700 text-white',
+};
+
+export function getCategoryColors(category: string): CategoryColorSet {
+  return CATEGORY_COLORS[category as Category] ?? FALLBACK_CATEGORY_COLOR;
+}
+
 export const MODE_LABELS: Record<SchoolMode, { name: string; subtitle: string }> = {
   nursery: { name: '保育園', subtitle: 'Nursery School Print Manager' },
   elementary: { name: '小学校', subtitle: 'Elementary School Print Manager' },

@@ -54,11 +54,41 @@ function dedupeItems(items: Item[]): Item[] {
   return result;
 }
 
+function normalizeLegacyCategory(category: unknown, mode: SchoolMode) {
+  if (category === '連絡帳') return 'お知らせ';
+  if (category === '給食') return 'お知らせ';
+  if (category === '行事' || category === 'お知らせ' || category === '持ち物') return category;
+  if (mode === 'elementary' && category === '提出物') return category;
+  return 'お知らせ';
+}
+
+function normalizeStoredItem(raw: unknown, fallbackMode: SchoolMode): Item | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const item = raw as Partial<Item> & Record<string, unknown>;
+  const mode = item.mode === 'nursery' || item.mode === 'elementary' ? item.mode : fallbackMode;
+  const title = typeof item.title === 'string' ? item.title : '';
+  if (!title) return null;
+
+  return {
+    id: typeof item.id === 'string' && item.id ? item.id : `${mode}-${title}`,
+    title,
+    cat: normalizeLegacyCategory(item.cat, mode),
+    date: typeof item.date === 'string' ? item.date : '',
+    memo: typeof item.memo === 'string' ? item.memo : '',
+    done: Boolean(item.done),
+    checkItems: Array.isArray(item.checkItems) ? item.checkItems.filter((v): v is string => typeof v === 'string') : [],
+    mode,
+  };
+}
+
 export function loadItems(mode: SchoolMode): Item[] {
   if (typeof window === 'undefined') return [];
   try {
     const data = localStorage.getItem(itemsKey(mode));
-    return data ? dedupeItems(JSON.parse(data)) : [];
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed)) return [];
+    return dedupeItems(parsed.map(item => normalizeStoredItem(item, mode)).filter((item): item is Item => item !== null));
   } catch {
     return [];
   }

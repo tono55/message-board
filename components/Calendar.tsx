@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Item, SchoolMode } from '@/lib/types';
-import { getMonthDays, getTwoWeekDays, getWeekStart, toDateString, CATEGORY_COLORS, trimLeadingDateLabel, formatDate, daysUntil } from '@/lib/utils';
+import { getMonthDays, getTwoWeekDays, getWeekStart, toDateString, trimLeadingDateLabel, formatDate, daysUntil, getCategoryColors } from '@/lib/utils';
 
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
 const MODE_BADGE: Record<string, string> = {
@@ -104,7 +104,7 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
         {dayItems.length > 0 && (
           <div className="flex gap-0.5 justify-center mt-0.5 flex-wrap">
             {dayItems.slice(0, 3).map((item, j) => (
-              <span key={j} className={`w-1.5 h-1.5 rounded-full ${CATEGORY_COLORS[item.cat].dot}`} />
+              <span key={j} className={`w-1.5 h-1.5 rounded-full ${getCategoryColors(item.cat).dot}`} />
             ))}
           </div>
         )}
@@ -147,7 +147,7 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
         {/* 予定リスト（デスクトップ: タイトル表示） */}
         <div className="hidden sm:block px-1 pb-1.5 space-y-0.5 min-h-[2rem]">
           {dayItems.slice(0, 4).map((item, j) => {
-            const colors = CATEGORY_COLORS[item.cat];
+            const colors = getCategoryColors(item.cat);
             return (
               <div
                 key={j}
@@ -165,7 +165,7 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
         {/* 予定リスト（モバイル: ドット表示） */}
         <div className="sm:hidden flex gap-0.5 justify-center pb-1.5 flex-wrap min-h-[1.5rem]">
           {dayItems.slice(0, 4).map((item, j) => (
-            <span key={j} className={`w-1.5 h-1.5 rounded-full ${CATEGORY_COLORS[item.cat].dot}`} />
+            <span key={j} className={`w-1.5 h-1.5 rounded-full ${getCategoryColors(item.cat).dot}`} />
           ))}
           {dayItems.length > 4 && (
             <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
@@ -350,7 +350,7 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
           ) : (
             <div className="grid gap-2 md:grid-cols-2">
               {focusedItems.map(item => {
-                const colors = CATEGORY_COLORS[item.cat];
+                const colors = getCategoryColors(item.cat);
                 return (
                   <button
                     key={item.id}

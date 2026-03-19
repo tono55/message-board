@@ -1,7 +1,7 @@
 'use client';
 
 import { Item } from '@/lib/types';
-import { CATEGORY_COLORS, formatDate, daysUntil } from '@/lib/utils';
+import { formatDate, daysUntil, getCategoryColors } from '@/lib/utils';
 
 interface DetailModalProps {
   item: Item;
@@ -11,7 +11,7 @@ interface DetailModalProps {
 }
 
 export default function DetailModal({ item, onClose, onToggleDone, onDelete }: DetailModalProps) {
-  const colors = CATEGORY_COLORS[item.cat];
+  const colors = getCategoryColors(item.cat);
   const days = daysUntil(item.date);
   const isEvent = item.cat === '行事';
 

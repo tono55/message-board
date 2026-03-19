@@ -1,7 +1,7 @@
 'use client';
 
 import { Item } from '@/lib/types';
-import { CATEGORY_COLORS, formatDate, daysUntil } from '@/lib/utils';
+import { formatDate, daysUntil, getCategoryColors } from '@/lib/utils';
 
 interface CardProps {
   item: Item;
@@ -19,7 +19,7 @@ const MODE_LABEL: Record<string, string> = {
 };
 
 export default function Card({ item, onClick }: CardProps) {
-  const colors = CATEGORY_COLORS[item.cat];
+  const colors = getCategoryColors(item.cat);
   const days = daysUntil(item.date);
   const isEvent = item.cat === '行事';
   const isOverdue = days < 0 && !item.done && !isEvent;

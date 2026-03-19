@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Item, Category, SchoolMode } from '@/lib/types';
-import { CATEGORY_COLORS, daysUntil } from '@/lib/utils';
+import { daysUntil, getCategoryColors } from '@/lib/utils';
 import Card from './Card';
 
 interface BoardProps {
@@ -124,7 +124,7 @@ export default function Board({ items, mode, selectedCat, onSelectCat, onCardCli
           カテゴリ: すべて
         </button>
         {allCategories.map(cat => {
-          const colors = CATEGORY_COLORS[cat];
+          const colors = getCategoryColors(cat);
           return (
             <button
               key={cat}
