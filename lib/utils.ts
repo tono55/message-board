@@ -1,7 +1,7 @@
 import { Category, SchoolMode, NurseryCategory, ElementaryCategory, Weekday } from './types';
 
-export const NURSERY_CATEGORIES: NurseryCategory[] = ['行事', '連絡帳', 'お知らせ', '給食', '持ち物'];
-export const ELEMENTARY_CATEGORIES: ElementaryCategory[] = ['行事', '提出物', 'お知らせ', '給食', '持ち物'];
+export const NURSERY_CATEGORIES: NurseryCategory[] = ['行事', 'お知らせ', '持ち物'];
+export const ELEMENTARY_CATEGORIES: ElementaryCategory[] = ['行事', '提出物', 'お知らせ', '持ち物'];
 
 export function getCategoriesForMode(mode: SchoolMode): Category[] {
   return mode === 'nursery' ? NURSERY_CATEGORIES : ELEMENTARY_CATEGORIES;
@@ -12,9 +12,7 @@ type CategoryColorSet = { bg: string; border: string; text: string; dot: string;
 export const CATEGORY_COLORS: Record<Category, CategoryColorSet> = {
   '行事':   { bg: 'bg-pink-50',   border: 'border-pink-400',   text: 'text-pink-700',   dot: 'bg-pink-400',   pill: 'bg-pink-100 text-pink-700', pillActive: 'bg-pink-500 text-white' },
   '提出物': { bg: 'bg-amber-50',  border: 'border-amber-400',  text: 'text-amber-700',  dot: 'bg-amber-400',  pill: 'bg-amber-100 text-amber-700', pillActive: 'bg-amber-500 text-white' },
-  '連絡帳': { bg: 'bg-amber-50',  border: 'border-amber-400',  text: 'text-amber-700',  dot: 'bg-amber-400',  pill: 'bg-amber-100 text-amber-700', pillActive: 'bg-amber-500 text-white' },
   'お知らせ': { bg: 'bg-blue-50', border: 'border-blue-400',   text: 'text-blue-700',   dot: 'bg-blue-400',   pill: 'bg-blue-100 text-blue-700', pillActive: 'bg-blue-500 text-white' },
-  '給食':   { bg: 'bg-green-50',  border: 'border-green-400',  text: 'text-green-700',  dot: 'bg-green-400',  pill: 'bg-green-100 text-green-700', pillActive: 'bg-green-500 text-white' },
   '持ち物': { bg: 'bg-purple-50', border: 'border-purple-400', text: 'text-purple-700', dot: 'bg-purple-400', pill: 'bg-purple-100 text-purple-700', pillActive: 'bg-purple-500 text-white' },
 };
 

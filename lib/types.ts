@@ -1,7 +1,7 @@
 export type SchoolMode = 'nursery' | 'elementary';
 
-export type NurseryCategory = '行事' | '連絡帳' | 'お知らせ' | '給食' | '持ち物';
-export type ElementaryCategory = '行事' | '提出物' | 'お知らせ' | '給食' | '持ち物';
+export type NurseryCategory = '行事' | 'お知らせ' | '持ち物';
+export type ElementaryCategory = '行事' | '提出物' | 'お知らせ' | '持ち物';
 export type Category = NurseryCategory | ElementaryCategory;
 
 export interface Item {
