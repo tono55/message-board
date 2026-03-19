@@ -184,9 +184,7 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
     return a.title.localeCompare(b.title);
   });
   const actionableItems = visibleItems.filter(item => !item.done && item.date && daysUntil(item.date) >= 0);
-  const todayCount = actionableItems.filter(item => item.date === todayStr).length;
-  const soonCount = actionableItems.filter(item => daysUntil(item.date) <= 3).length;
-  const nextUpcoming = [...actionableItems].sort((a, b) => a.date.localeCompare(b.date))[0] ?? null;
+  const soonCount = actionableItems.filter(item => daysUntil(item.date) <= 7).length;
 
   return (
     <section id="calendar" className="max-w-5xl mx-auto px-4 py-8">
@@ -256,23 +254,16 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
         <div className="flex flex-wrap gap-2 mb-4">
           <button
             onClick={() => onSelectDate(todayStr)}
-            className="px-3 py-2 rounded-full bg-green-50 text-green-700 text-xs font-medium hover:bg-green-100 transition-colors cursor-pointer"
-          >
-            今日 {todayCount}件
-          </button>
-          <button
-            onClick={() => onSelectDate(nextUpcoming?.date ?? todayStr)}
             className="px-3 py-2 rounded-full bg-amber-50 text-amber-700 text-xs font-medium hover:bg-amber-100 transition-colors cursor-pointer"
           >
-            3日以内 {soonCount}件
+            7日以内 {soonCount}件
           </button>
-          {nextUpcoming && (
+          {selectedDate && (
             <button
-              onClick={() => onSelectDate(nextUpcoming.date)}
-              className="px-3 py-2 rounded-full bg-blue-50 text-blue-700 text-xs font-medium hover:bg-blue-100 transition-colors cursor-pointer"
-              title={trimLeadingDateLabel(nextUpcoming.title)}
+              onClick={() => onSelectDate('')}
+              className="px-3 py-2 rounded-full bg-gray-100 text-gray-600 text-xs font-medium hover:bg-gray-200 transition-colors cursor-pointer"
             >
-              次の予定 {formatDate(nextUpcoming.date)}
+              選択解除
             </button>
           )}
         </div>
@@ -314,7 +305,17 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
               </p>
               <h3 className="text-sm md:text-base font-semibold text-gray-800">{formatDate(focusedDate)}</h3>
             </div>
-            <span className="text-[10px] text-gray-400">日付をタップで切替</span>
+            <div className="flex items-center gap-2">
+              {selectedDate && (
+                <button
+                  onClick={() => onSelectDate('')}
+                  className="text-[10px] px-2 py-1 rounded-full border border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 cursor-pointer"
+                >
+                  解除
+                </button>
+              )}
+              <span className="text-[10px] text-gray-400">日付をタップで切替</span>
+            </div>
           </div>
 
           {focusedItems.length === 0 ? (
