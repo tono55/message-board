@@ -349,7 +349,7 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
             </p>
           ) : (
             <div className="grid gap-2 md:grid-cols-2">
-              {focusedItems.slice(0, 5).map(item => {
+              {focusedItems.map(item => {
                 const colors = CATEGORY_COLORS[item.cat];
                 return (
                   <button
@@ -380,9 +380,6 @@ export default function Calendar({ items, mode, currentMonth, selectedDate, onSe
                 );
               })}
             </div>
-          )}
-          {focusedItems.length > 5 && (
-            <p className="text-[11px] text-gray-400 pt-2">ほか {focusedItems.length - 5} 件</p>
           )}
         </div>
       </div>
