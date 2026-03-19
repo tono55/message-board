@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { MealMenu, SchoolMode } from '@/lib/types';
 import { getWeekDates, WEEKDAY_LABELS } from '@/lib/utils';
 import MealMenuEditModal from './MealMenuEditModal';
@@ -8,33 +8,19 @@ import MealMenuEditModal from './MealMenuEditModal';
 interface Props {
   menus: MealMenu[];
   mode: SchoolMode;
+  baseDate?: Date;
+  onNavigateWeek?: (delta: number) => void;
+  onResetWeek?: () => void;
   onUpsert: (menu: MealMenu) => void;
   onDelete: (date: string) => void;
 }
 
-export default function MealMenuSection({ menus, mode, onUpsert, onDelete }: Props) {
+export default function MealMenuSection({ menus, mode, baseDate, onNavigateWeek, onResetWeek, onUpsert, onDelete }: Props) {
   const [editDate, setEditDate] = useState<string | null>(null);
-  // 献立は月〜金表示なので月曜起点で管理
-  const [weekStart, setWeekStart] = useState<Date>(() => {
-    const today = new Date();
-    const day = today.getDay();
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
-    monday.setHours(0, 0, 0, 0);
-    return monday;
-  });
   const isNursery = mode === 'nursery';
 
-  const weekDates = getWeekDates(weekStart);
+  const weekDates = useMemo(() => getWeekDates(baseDate), [baseDate]);
   const getMenu = (dateStr: string) => menus.find(m => m.date === dateStr);
-
-  const navigate = (delta: number) => {
-    setWeekStart(prev => {
-      const d = new Date(prev);
-      d.setDate(d.getDate() + delta * 7);
-      return d;
-    });
-  };
 
   const weekLabel = (() => {
     const first = weekDates[0].date;
@@ -52,14 +38,20 @@ export default function MealMenuSection({ menus, mode, onUpsert, onDelete }: Pro
         <h2 className="text-lg font-bold">献立一覧</h2>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => onNavigateWeek?.(-1)}
             className="text-gray-400 hover:text-gray-700 p-1 cursor-pointer"
           >
             ◀
           </button>
           <span className="text-sm text-gray-600 min-w-[7rem] text-center">{weekLabel}</span>
           <button
-            onClick={() => navigate(1)}
+            onClick={() => onResetWeek?.()}
+            className="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 cursor-pointer"
+          >
+            今週
+          </button>
+          <button
+            onClick={() => onNavigateWeek?.(1)}
             className="text-gray-400 hover:text-gray-700 p-1 cursor-pointer"
           >
             ▶

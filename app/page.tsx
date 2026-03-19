@@ -16,6 +16,11 @@ import MealMenuSection from '@/components/MealMenuSection';
 import TimetableSection from '@/components/TimetableSection';
 import HomeworkSection from '@/components/HomeworkSection';
 
+function toWeekViewDate(dateStr?: string): Date {
+  const base = dateStr ? new Date(`${dateStr}T00:00:00`) : new Date();
+  return Number.isNaN(base.getTime()) ? new Date() : base;
+}
+
 export default function Home() {
   const [mode, setMode] = useState<SchoolMode>('elementary');
   // 両モードのアイテムをそれぞれ管理
@@ -28,6 +33,7 @@ export default function Home() {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
+  const [weekViewDate, setWeekViewDate] = useState<Date>(() => toWeekViewDate());
   const [showAddModal, setShowAddModal] = useState(false);
   const [detailItem, setDetailItem] = useState<Item | null>(null);
 
@@ -44,6 +50,22 @@ export default function Home() {
   const todayHomework = homework.filter(h => h.date === today);
   // Hero の統計は現在モードのアイテムで計算
   const currentItems = isNursery ? nurseryItems : elementaryItems;
+  const defaultWeekViewDate = useMemo(() => {
+    if (selectedDate) {
+      return toWeekViewDate(selectedDate);
+    }
+
+    const nextElementaryDate = elementaryItems
+      .filter(item => item.date && item.date >= today)
+      .map(item => item.date)
+      .sort()[0];
+
+    return toWeekViewDate(nextElementaryDate ?? today);
+  }, [elementaryItems, selectedDate, today]);
+
+  useEffect(() => {
+    setWeekViewDate(defaultWeekViewDate);
+  }, [defaultWeekViewDate]);
 
   useEffect(() => {
     let cancelled = false;
@@ -124,7 +146,20 @@ export default function Home() {
 
   const handleSelectDate = useCallback((date: string) => {
     setSelectedDate(date);
+    if (date) setWeekViewDate(toWeekViewDate(date));
   }, []);
+
+  const handleNavigateWeekView = useCallback((delta: number) => {
+    setWeekViewDate(prev => {
+      const next = new Date(prev);
+      next.setDate(next.getDate() + delta * 7);
+      return next;
+    });
+  }, []);
+
+  const handleResetWeekView = useCallback(() => {
+    setWeekViewDate(defaultWeekViewDate);
+  }, [defaultWeekViewDate]);
 
   if (!loaded) {
     return (
@@ -163,10 +198,24 @@ export default function Home() {
       />
 
       {!isNursery && (
-        <TimetableSection timetable={timetable} onUpdate={updateTimetable} />
+        <TimetableSection
+          timetable={timetable}
+          baseDate={weekViewDate}
+          onNavigateWeek={handleNavigateWeekView}
+          onResetWeek={handleResetWeekView}
+          onUpdate={updateTimetable}
+        />
       )}
 
-      <MealMenuSection menus={menus} mode={mode} onUpsert={upsertMenu} onDelete={deleteMenu} />
+      <MealMenuSection
+        menus={menus}
+        mode={mode}
+        baseDate={weekViewDate}
+        onNavigateWeek={handleNavigateWeekView}
+        onResetWeek={handleResetWeekView}
+        onUpsert={upsertMenu}
+        onDelete={deleteMenu}
+      />
 
       <Board
         items={allItems}

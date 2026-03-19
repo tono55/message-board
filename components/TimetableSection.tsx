@@ -1,25 +1,59 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Timetable, Weekday } from '@/lib/types';
 import { WEEKDAY_LABELS, WEEKDAYS, getSubjectColor, getWeekDates } from '@/lib/utils';
 import TimetableEditModal from './TimetableEditModal';
 
 interface Props {
   timetable: Timetable;
+  baseDate?: Date;
+  onNavigateWeek?: (delta: number) => void;
+  onResetWeek?: () => void;
   onUpdate: (timetable: Timetable) => void;
 }
 
-export default function TimetableSection({ timetable, onUpdate }: Props) {
+export default function TimetableSection({ timetable, baseDate, onNavigateWeek, onResetWeek, onUpdate }: Props) {
   const [editDay, setEditDay] = useState<Weekday | null>(null);
 
   const maxPeriods = Math.max(1, ...WEEKDAYS.map(d => timetable[d].length));
-  const weekDateMap = new Map(getWeekDates().map(({ weekday, dateStr }) => [weekday, dateStr.slice(5).replace('-', '/')]));
+  const weekDates = useMemo(() => getWeekDates(baseDate), [baseDate]);
+  const weekDateMap = new Map(weekDates.map(({ weekday, dateStr }) => [weekday, dateStr.slice(5).replace('-', '/')]));
+  const weekLabel = (() => {
+    const first = weekDates[0].date;
+    const last = weekDates[4].date;
+    const fy = first.getFullYear();
+    const fm = first.getMonth() + 1;
+    const em = last.getMonth() + 1;
+    if (fm !== em) return `${fy}年${fm}月〜${em}月`;
+    return `${fy}年${fm}月`;
+  })();
 
   return (
     <section id="timetable" className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold">時間割</h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onNavigateWeek?.(-1)}
+            className="text-gray-400 hover:text-gray-700 p-1 cursor-pointer"
+          >
+            ◀
+          </button>
+          <span className="text-sm text-gray-600 min-w-[7rem] text-center">{weekLabel}</span>
+          <button
+            onClick={() => onResetWeek?.()}
+            className="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 cursor-pointer"
+          >
+            今週
+          </button>
+          <button
+            onClick={() => onNavigateWeek?.(1)}
+            className="text-gray-400 hover:text-gray-700 p-1 cursor-pointer"
+          >
+            ▶
+          </button>
+        </div>
       </div>
       {/* モバイル: 曜日別カードレイアウト */}
       <div className="sm:hidden space-y-2">
