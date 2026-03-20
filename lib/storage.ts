@@ -13,6 +13,7 @@ function itemsKey(mode: SchoolMode): string {
 
 const MODE_KEY = `${STORAGE_PREFIX}-mode`;
 const UPDATE_HISTORY_KEY = `${STORAGE_PREFIX}-update-history`;
+const SEEDED_TIMETABLE_MONTH_KEY = `${STORAGE_PREFIX}-seeded-timetable-month`;
 
 function storageKey(mode: SchoolMode, feature: string): string {
   return `${STORAGE_PREFIX}-${mode}-${feature}`;
@@ -149,6 +150,7 @@ export function seedSampleData(): void {
   if (!sampleData) return;
 
   const seededMonths = loadJson<string[]>(SEEDED_MONTHS_KEY, []);
+  const seededTimetableMonth = loadJson<string>(SEEDED_TIMETABLE_MONTH_KEY, '');
 
   saveJson(itemsKey('nursery'), dedupeItems(mergeItems(loadItems('nursery'), sampleData.nurseryItems)));
   saveJson(itemsKey('elementary'), dedupeItems(mergeItems(loadItems('elementary'), sampleData.elementaryItems)));
@@ -156,8 +158,9 @@ export function seedSampleData(): void {
   saveJson(storageKey('elementary', 'meals'), mergeMeals(loadMealMenus('elementary'), sampleData.elementaryMeals));
 
   const currentTimetable = loadTimetable();
-  if (isEmptyTimetable(currentTimetable)) {
+  if (isEmptyTimetable(currentTimetable) || seededTimetableMonth !== monthKey) {
     saveJson(storageKey('elementary', 'timetable'), sampleData.timetable);
+    saveJson(SEEDED_TIMETABLE_MONTH_KEY, monthKey);
   }
 
   const seededHistory = getSampleUpdateHistoryForMonth(monthKey);
