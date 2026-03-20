@@ -15,6 +15,7 @@ function itemsKey(mode: SchoolMode): string {
 const MODE_KEY = `${STORAGE_PREFIX}-mode`;
 const UPDATE_HISTORY_KEY = `${STORAGE_PREFIX}-update-history`;
 const SEEDED_TIMETABLE_MONTHS_KEY = `${STORAGE_PREFIX}-seeded-timetable-months`;
+const APPLIED_FIXES_KEY = `${STORAGE_PREFIX}-applied-fixes`;
 
 function storageKey(mode: SchoolMode, feature: string): string {
   return `${STORAGE_PREFIX}-${mode}-${feature}`;
@@ -148,6 +149,56 @@ function mergeTimetables(existing: TimetableByWeek, incoming: TimetableByWeek): 
   return { ...existing, ...incoming };
 }
 
+function applyMarchWeekProgramFix(sampleData: ReturnType<typeof getSampleDataForMonth>): void {
+  if (!sampleData) return;
+
+  const appliedFixes = loadJson<string[]>(APPLIED_FIXES_KEY, []);
+  const fixId = '2026-03-week-program-ocr-fix';
+  if (appliedFixes.includes(fixId)) return;
+
+  const correctedItems = new Map(
+    sampleData.elementaryItems
+      .filter(item => item.id === '2026-03-el-9' || item.id === '2026-03-el-10' || item.id === '2026-03-el-11')
+      .map(item => [item.id, item]),
+  );
+
+  const legacyMemosById: Record<string, string> = {
+    '2026-03-el-9': '時間割: 国語（ひろがることば・これまでこれから／言葉あそび 日本のことばリズム）/ 算数（もうすぐ3年生・学習のまとめ）/ 体育（校庭 10:20〜11:05 スペシャルお楽しみ会）/ 図工（11:10〜11:55 作品バッグに自分マークをかこう）。下校 12:10。',
+    '2026-03-el-10': '時間割: 学活（通知表を見て来年のめあてを立てよう）/ 生活（3年生の場所をかくにんしよう）/ 国語（連絡帳日記 1年間をふりかえろう）/ 学活（春休みの生活について）。下校 12:10。',
+    '2026-03-el-11': '朝自習: 作品のまとめ、体育館移動。8:35〜 修了式、10:25〜体育館移動、10:35〜 離任式。国語: 3年生になった自分へお手紙。下校 11:30。',
+  };
+
+  let itemFixApplied = false;
+  const correctedStoredItems = loadItems('elementary').map(item => {
+    const corrected = correctedItems.get(item.id);
+    if (!corrected || item.memo !== legacyMemosById[item.id]) return item;
+    itemFixApplied = true;
+    return {
+      ...corrected,
+      done: item.done,
+      checkItems: item.checkItems,
+    };
+  });
+
+  if (itemFixApplied) {
+    saveItems('elementary', correctedStoredItems);
+  }
+
+  const legacyTimetable = loadTimetable('2026-03-23');
+  const looksLikeLegacyWeekProgram =
+    legacyTimetable.mon[0]?.note === 'ひろがることば／これまでこれから／言葉あそび 日本のことばリズム' &&
+    legacyTimetable.tue[0]?.subject === '学活' &&
+    legacyTimetable.wed[1]?.note === '春休み';
+
+  if (looksLikeLegacyWeekProgram) {
+    saveTimetable('2026-03-23', sampleData.timetables['2026-03-23']);
+  }
+
+  if (itemFixApplied || looksLikeLegacyWeekProgram) {
+    saveJson(APPLIED_FIXES_KEY, [...appliedFixes, fixId]);
+  }
+}
+
 export function seedSampleData(): void {
   if (typeof window === 'undefined') return;
   const monthKey = getSampleMonthKey();
@@ -170,6 +221,10 @@ export function seedSampleData(): void {
   const seededHistory = getSampleUpdateHistoryForMonth(monthKey);
   if (seededHistory.length > 0) {
     saveUpdateHistory(mergeUpdateHistory(loadUpdateHistory(), seededHistory));
+  }
+
+  if (monthKey === '2026-03') {
+    applyMarchWeekProgramFix(sampleData);
   }
 
   if (!seededMonths.includes(monthKey)) {
