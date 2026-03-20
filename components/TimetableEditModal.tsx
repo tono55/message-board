@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { TimetableEntry, Weekday } from '@/lib/types';
-import { WEEKDAY_LABELS, COMMON_SUBJECTS, getSubjectColor } from '@/lib/utils';
+import { WEEKDAY_LABELS, COMMON_SUBJECTS, getSubjectColor, getTimetableRowLabel } from '@/lib/utils';
 
 interface Props {
   weekday: Weekday;
@@ -27,8 +27,13 @@ export default function TimetableEditModal({ weekday, entries, onSave, onClose }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const filtered = rows.filter(r => r.subject.trim());
-    onSave(filtered);
+    const trimmed = [...rows];
+    while (trimmed.length > 0) {
+      const last = trimmed[trimmed.length - 1];
+      if (last.subject.trim() || last.note?.trim()) break;
+      trimmed.pop();
+    }
+    onSave(trimmed);
   };
 
   return (
@@ -41,7 +46,7 @@ export default function TimetableEditModal({ weekday, entries, onSave, onClose }
         <form onSubmit={handleSubmit} className="space-y-3">
           {rows.map((row, i) => (
             <div key={i} className="flex items-start gap-2">
-              <span className="text-xs text-gray-400 mt-2.5 w-5 shrink-0">{i + 1}</span>
+              <span className="text-xs text-gray-400 mt-2.5 w-5 shrink-0">{getTimetableRowLabel(i, rows.length)}</span>
               <div className="flex-1 space-y-1">
                 <div className="flex flex-wrap gap-1 mb-1">
                   {COMMON_SUBJECTS.map(subj => (

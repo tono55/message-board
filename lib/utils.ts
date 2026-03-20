@@ -1,4 +1,4 @@
-import { Category, SchoolMode, NurseryCategory, ElementaryCategory, Weekday, Timetable } from './types';
+import { Category, SchoolMode, NurseryCategory, ElementaryCategory, Weekday, Timetable, TimetableEntry } from './types';
 
 export const NURSERY_CATEGORIES: NurseryCategory[] = ['行事', 'お知らせ', '持ち物'];
 export const ELEMENTARY_CATEGORIES: ElementaryCategory[] = ['行事', '提出物', 'お知らせ', '持ち物'];
@@ -111,6 +111,8 @@ export function getTwoWeekDays(weekStart: Date): Date[] {
 
 // 教科色マップ
 export const SUBJECT_COLORS: Record<string, string> = {
+  '朝自習': 'bg-slate-100 text-slate-700 border-slate-300',
+  '下校': 'bg-emerald-100 text-emerald-700 border-emerald-300',
   '国語': 'bg-red-100 text-red-700 border-red-300',
   '算数': 'bg-blue-100 text-blue-700 border-blue-300',
   '数学': 'bg-blue-100 text-blue-700 border-blue-300',
@@ -127,6 +129,7 @@ export const SUBJECT_COLORS: Record<string, string> = {
   '生活': 'bg-lime-100 text-lime-700 border-lime-300',
   '書写': 'bg-stone-100 text-stone-700 border-stone-300',
   '総合': 'bg-teal-100 text-teal-700 border-teal-300',
+  '帰りの会': 'bg-stone-100 text-stone-700 border-stone-300',
 };
 
 export const DEFAULT_SUBJECT_COLOR = 'bg-gray-100 text-gray-700 border-gray-300';
@@ -141,7 +144,7 @@ export const WEEKDAY_LABELS: Record<Weekday, string> = {
 
 export const WEEKDAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri'];
 
-export const COMMON_SUBJECTS = ['国語', '算数', '理科', '社会', '英語', '体育', '音楽', '図工', '家庭', '道徳', '生活', '書写', '総合'];
+export const COMMON_SUBJECTS = ['朝自習', '国語', '算数', '理科', '社会', '英語', '体育', '音楽', '図工', '家庭', '道徳', '生活', '書写', '総合', '帰りの会', '行事', '下校'];
 
 // 今週の月〜金の日付を取得
 export function getWeekDates(baseDate?: Date): { weekday: Weekday; date: Date; dateStr: string }[] {
@@ -160,6 +163,37 @@ export function getWeekDates(baseDate?: Date): { weekday: Weekday; date: Date; d
 
 export function getWeekKey(baseDate?: Date): string {
   return getWeekDates(baseDate)[0].dateStr;
+}
+
+export function getTimetableRowLabel(index: number, total: number): string {
+  if (index === 0) return '朝';
+  if (index === total - 1) return '下校';
+  return String(index);
+}
+
+export function normalizeTimetableEntries(entries: TimetableEntry[]): TimetableEntry[] {
+  let normalized = [...entries];
+
+  if (normalized.length === 0 || (normalized[0]?.subject !== '朝自習' && normalized[0]?.subject !== '')) {
+    normalized = [{ subject: '' }, ...normalized];
+  }
+
+  const last = normalized[normalized.length - 1];
+  if (normalized.length === 1 || (last?.subject !== '下校' && last?.subject !== '')) {
+    normalized = [...normalized, { subject: '' }];
+  }
+
+  return normalized;
+}
+
+export function normalizeTimetable(timetable: Timetable): Timetable {
+  return {
+    mon: normalizeTimetableEntries(timetable.mon),
+    tue: normalizeTimetableEntries(timetable.tue),
+    wed: normalizeTimetableEntries(timetable.wed),
+    thu: normalizeTimetableEntries(timetable.thu),
+    fri: normalizeTimetableEntries(timetable.fri),
+  };
 }
 
 export function emptyTimetable(): Timetable {

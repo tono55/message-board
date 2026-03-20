@@ -2,19 +2,18 @@
 
 import { useMemo, useState } from 'react';
 import { Timetable, Weekday } from '@/lib/types';
-import { WEEKDAY_LABELS, WEEKDAYS, getSubjectColor, getWeekDates } from '@/lib/utils';
+import { WEEKDAY_LABELS, WEEKDAYS, getSubjectColor, getTimetableRowLabel, getWeekDates } from '@/lib/utils';
 import TimetableEditModal from './TimetableEditModal';
 
 interface Props {
   timetable: Timetable;
   baseDate?: Date;
-  weekKey: string;
   onNavigateWeek?: (delta: number) => void;
   onResetWeek?: () => void;
   onUpdate: (timetable: Timetable) => void;
 }
 
-export default function TimetableSection({ timetable, baseDate, weekKey, onNavigateWeek, onResetWeek, onUpdate }: Props) {
+export default function TimetableSection({ timetable, baseDate, onNavigateWeek, onResetWeek, onUpdate }: Props) {
   const [editDay, setEditDay] = useState<Weekday | null>(null);
 
   const maxPeriods = Math.max(1, ...WEEKDAYS.map(d => timetable[d].length));
@@ -33,7 +32,6 @@ export default function TimetableSection({ timetable, baseDate, weekKey, onNavig
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-bold">時間割</h2>
-          <p className="text-xs text-gray-400 mt-1">週キー: {weekKey}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -76,18 +74,24 @@ export default function TimetableSection({ timetable, baseDate, weekKey, onNavig
                 編集
               </button>
             </div>
-            <div className="px-3 py-2 flex flex-wrap gap-1.5">
+            <div className="px-3 py-2 space-y-1.5">
               {timetable[d].length === 0 ? (
                 <span className="text-xs text-gray-300">科目なし</span>
               ) : (
                 timetable[d].map((entry, i) => (
-                  <div key={i} className="flex items-center gap-1">
-                    <span className="text-xs text-gray-400 w-4 text-right">{i + 1}.</span>
-                    <span className={`text-xs px-1.5 py-0.5 rounded border font-medium ${getSubjectColor(entry.subject)}`}>
-                      {entry.subject}
-                    </span>
-                    {entry.note && (
-                      <span className="text-xs text-gray-400">{entry.note}</span>
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-xs text-gray-400 w-5 text-right shrink-0">{getTimetableRowLabel(i, timetable[d].length)}</span>
+                    {entry.subject ? (
+                      <div className="flex flex-wrap items-center gap-1">
+                        <span className={`text-xs px-1.5 py-0.5 rounded border font-medium ${getSubjectColor(entry.subject)}`}>
+                          {entry.subject}
+                        </span>
+                        {entry.note && (
+                          <span className="text-xs text-gray-400">{entry.note}</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-300">-</span>
                     )}
                   </div>
                 ))
@@ -123,13 +127,13 @@ export default function TimetableSection({ timetable, baseDate, weekKey, onNavig
             {Array.from({ length: maxPeriods }, (_, i) => (
               <tr key={i} className="hover:bg-gray-50">
                 <td className="border border-gray-200 px-2 py-2 text-center text-xs text-gray-400 font-medium">
-                  {i + 1}
+                  {getTimetableRowLabel(i, maxPeriods)}
                 </td>
                 {WEEKDAYS.map(d => {
                   const entry = timetable[d][i];
                   return (
                     <td key={d} className="border border-gray-200 px-2 py-2 text-center">
-                      {entry ? (
+                      {entry?.subject ? (
                         <div>
                           <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium border ${getSubjectColor(entry.subject)}`}>
                             {entry.subject}

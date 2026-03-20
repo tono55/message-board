@@ -4,7 +4,7 @@ import {
   getSampleUpdateHistoryForMonth,
   getSampleMonthKey,
 } from './sampleData';
-import { emptyTimetable, getWeekKey } from './utils';
+import { emptyTimetable, getWeekKey, normalizeTimetable } from './utils';
 
 const STORAGE_PREFIX = 'otayori-board';
 
@@ -153,7 +153,7 @@ function applyMarchWeekProgramFix(sampleData: ReturnType<typeof getSampleDataFor
   if (!sampleData) return;
 
   const appliedFixes = loadJson<string[]>(APPLIED_FIXES_KEY, []);
-  const fixId = '2026-03-week-program-ocr-fix';
+  const fixId = '2026-03-week-program-item-trim';
   if (appliedFixes.includes(fixId)) return;
 
   const correctedItems = new Map(
@@ -162,16 +162,26 @@ function applyMarchWeekProgramFix(sampleData: ReturnType<typeof getSampleDataFor
       .map(item => [item.id, item]),
   );
 
-  const legacyMemosById: Record<string, string> = {
-    '2026-03-el-9': '時間割: 国語（ひろがることば・これまでこれから／言葉あそび 日本のことばリズム）/ 算数（もうすぐ3年生・学習のまとめ）/ 体育（校庭 10:20〜11:05 スペシャルお楽しみ会）/ 図工（11:10〜11:55 作品バッグに自分マークをかこう）。下校 12:10。',
-    '2026-03-el-10': '時間割: 学活（通知表を見て来年のめあてを立てよう）/ 生活（3年生の場所をかくにんしよう）/ 国語（連絡帳日記 1年間をふりかえろう）/ 学活（春休みの生活について）。下校 12:10。',
-    '2026-03-el-11': '朝自習: 作品のまとめ、体育館移動。8:35〜 修了式、10:25〜体育館移動、10:35〜 離任式。国語: 3年生になった自分へお手紙。下校 11:30。',
+  const legacyMemosById: Record<string, string[]> = {
+    '2026-03-el-9': [
+      '時間割: 国語（ひろがることば・これまでこれから／言葉あそび 日本のことばリズム）/ 算数（もうすぐ3年生・学習のまとめ）/ 体育（校庭 10:20〜11:05 スペシャルお楽しみ会）/ 図工（11:10〜11:55 作品バッグに自分マークをかこう）。下校 12:10。',
+      '時間割: 国語（ひろがることば・これまでこれから）/ 算数（もうすぐ3年生・学習のまとめ）/ 体育（校庭 10:20〜11:05 スペシャルお楽しみ会）/ 図工（11:10〜11:55 作品バッグに自分マークをかこう）。朝自習: 作品まとめ。下校 12:10。',
+    ],
+    '2026-03-el-10': [
+      '時間割: 学活（通知表を見て来年のめあてを立てよう）/ 生活（3年生の場所をかくにんしよう）/ 国語（連絡帳日記 1年間をふりかえろう）/ 学活（春休みの生活について）。下校 12:10。',
+      '時間割: 国語（言葉あそび・日本のことばリズム 〜9:25）/ 生活（3年生の場所をかくにんしよう）/ 国語（10:20〜11:05 連絡帳日記・1年間をふりかえろう）/ 学活（11:10〜11:55 春休みの生活について）。朝自習: 作品のまとめ。下校 12:10。',
+    ],
+    '2026-03-el-11': [
+      '朝自習: 作品のまとめ、体育館移動。8:35〜 修了式、10:25〜体育館移動、10:35〜 離任式。国語: 3年生になった自分へお手紙。下校 11:30。',
+      '朝自習: 体育館移動。8:35〜 修了式。時間割: 学活（〜9:25 通知表を見て来年のめあてを立てよう）/ 国語（9:30〜10:15 3年生になった自分へお手紙）/ 行事（10:25〜体育館移動、10:35〜離任式）/ 帰りの会（11:10〜11:20）。下校 11:30。',
+    ],
   };
 
   let itemFixApplied = false;
   const correctedStoredItems = loadItems('elementary').map(item => {
     const corrected = correctedItems.get(item.id);
-    if (!corrected || item.memo !== legacyMemosById[item.id]) return item;
+    const legacyMemos = legacyMemosById[item.id];
+    if (!corrected || !legacyMemos?.includes(item.memo)) return item;
     itemFixApplied = true;
     return {
       ...corrected,
@@ -186,15 +196,32 @@ function applyMarchWeekProgramFix(sampleData: ReturnType<typeof getSampleDataFor
 
   const legacyTimetable = loadTimetable('2026-03-23');
   const looksLikeLegacyWeekProgram =
-    legacyTimetable.mon[0]?.note === 'ひろがることば／これまでこれから／言葉あそび 日本のことばリズム' &&
-    legacyTimetable.tue[0]?.subject === '学活' &&
-    legacyTimetable.wed[1]?.note === '春休み';
+    (
+      legacyTimetable.mon[0]?.note === 'ひろがることば／これまでこれから／言葉あそび 日本のことばリズム' ||
+      legacyTimetable.mon[1]?.note === 'ひろがることば／これまでこれから／言葉あそび 日本のことばリズム'
+    ) &&
+    (
+      legacyTimetable.tue[0]?.subject === '学活' ||
+      legacyTimetable.tue[1]?.subject === '学活'
+    ) &&
+    (
+      legacyTimetable.wed[1]?.note === '春休み' ||
+      legacyTimetable.wed[2]?.note === '春休み'
+    );
 
-  if (looksLikeLegacyWeekProgram) {
+  const needsMorningStudyWeekProgram =
+    legacyTimetable.mon[0]?.subject !== '朝自習' &&
+    legacyTimetable.tue[0]?.subject !== '朝自習' &&
+    legacyTimetable.wed[0]?.subject !== '朝自習' &&
+    legacyTimetable.mon.some(entry => entry.note === 'ひろがることば／これまでこれから') &&
+    legacyTimetable.tue.some(entry => entry.note === '〜9:25 言葉あそび／日本のことばリズム') &&
+    legacyTimetable.wed.some(entry => entry.note === '11:10〜11:20');
+
+  if (looksLikeLegacyWeekProgram || needsMorningStudyWeekProgram) {
     saveTimetable('2026-03-23', sampleData.timetables['2026-03-23']);
   }
 
-  if (itemFixApplied || looksLikeLegacyWeekProgram) {
+  if (itemFixApplied || looksLikeLegacyWeekProgram || needsMorningStudyWeekProgram) {
     saveJson(APPLIED_FIXES_KEY, [...appliedFixes, fixId]);
   }
 }
@@ -251,10 +278,12 @@ export function loadTimetables(): TimetableByWeek {
   if (looksLikeLegacyTimetable) {
     const legacy = candidate as unknown as Timetable;
     if (isEmptyTimetable(legacy)) return empty;
-    return { [getWeekKey()]: legacy };
+    return { [getWeekKey()]: normalizeTimetable(legacy) };
   }
 
-  return candidate as TimetableByWeek;
+  return Object.fromEntries(
+    Object.entries(candidate).map(([weekKey, timetable]) => [weekKey, normalizeTimetable(timetable as Timetable)]),
+  ) as TimetableByWeek;
 }
 export function saveTimetables(timetables: TimetableByWeek): void {
   saveJson(storageKey('elementary', 'timetable'), timetables);
