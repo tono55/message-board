@@ -12,15 +12,17 @@ interface NavbarProps {
 
 const NAV_LINKS: Record<SchoolMode, { label: string; href: string }[]> = {
   nursery: [
-    { label: '献立', href: '#meal-menu' },
+    { label: '更新履歴', href: '#update-history' },
     { label: 'カレンダー', href: '#calendar' },
-    { label: '掲示板', href: '#board' },
+    { label: '予定一覧', href: '#board' },
+    { label: '献立', href: '#meal-menu' },
   ],
   elementary: [
-    { label: '献立', href: '#meal-menu' },
-    { label: '時間割', href: '#timetable' },
+    { label: '更新履歴', href: '#update-history' },
     { label: 'カレンダー', href: '#calendar' },
-    { label: '掲示板', href: '#board' },
+    { label: '予定一覧', href: '#board' },
+    { label: '時間割', href: '#timetable' },
+    { label: '献立', href: '#meal-menu' },
   ],
 };
 
