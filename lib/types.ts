@@ -37,6 +37,7 @@ export interface UpdateHistoryEntry {
 export type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri';
 export interface TimetableEntry { subject: string; note?: string; }
 export type Timetable = Record<Weekday, TimetableEntry[]>;
+export type TimetableByWeek = Record<string, Timetable>;
 
 // お迎え（保育園のみ）
 export interface PickupRecord {

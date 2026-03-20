@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { SchoolMode, MealMenu, Timetable, PickupRecord, HealthRecord } from './types';
+import { SchoolMode, TimetableByWeek, MealMenu, Timetable, PickupRecord, HealthRecord } from './types';
 import {
   loadMealMenus, saveMealMenus,
-  loadTimetable, saveTimetable,
+  loadTimetables, saveTimetables,
   loadPickups, savePickups,
   loadHealthRecords, saveHealthRecords,
 } from './storage';
-import { todayString } from './utils';
+import { emptyTimetable, getWeekKey, todayString } from './utils';
 
 export function useMealMenus(mode: SchoolMode, loaded: boolean) {
   const [menus, setMenus] = useState<MealMenu[]>([]);
@@ -46,27 +46,29 @@ export function useMealMenus(mode: SchoolMode, loaded: boolean) {
   return { menus, upsertMenu, deleteMenu };
 }
 
-export function useTimetable(loaded: boolean) {
-  const [timetable, setTimetable] = useState<Timetable>({ mon: [], tue: [], wed: [], thu: [], fri: [] });
+export function useTimetable(loaded: boolean, baseDate?: Date) {
+  const [timetables, setTimetables] = useState<TimetableByWeek>({});
   const hydratedRef = useRef(false);
+  const weekKey = getWeekKey(baseDate);
 
   useEffect(() => {
     if (!loaded) return;
     hydratedRef.current = false;
     queueMicrotask(() => {
-      setTimetable(loadTimetable());
+      setTimetables(loadTimetables());
       hydratedRef.current = true;
     });
   }, [loaded]);
 
   useEffect(() => {
-    if (loaded && hydratedRef.current) saveTimetable(timetable);
-  }, [timetable, loaded]);
+    if (loaded && hydratedRef.current) saveTimetables(timetables);
+  }, [timetables, loaded]);
 
   const updateTimetable = useCallback((newTimetable: Timetable) => {
-    setTimetable(newTimetable);
-  }, []);
+    setTimetables(prev => ({ ...prev, [weekKey]: newTimetable }));
+  }, [weekKey]);
 
+  const timetable = timetables[weekKey] ?? emptyTimetable();
   return { timetable, updateTimetable };
 }
 

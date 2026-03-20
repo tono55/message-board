@@ -1,11 +1,11 @@
-import { Item, MealMenu, Timetable, UpdateHistoryEntry } from './types';
+import { Item, MealMenu, TimetableByWeek, UpdateHistoryEntry } from './types';
 
 export interface SampleDataSet {
   nurseryItems: Item[];
   elementaryItems: Item[];
   nurseryMeals: MealMenu[];
   elementaryMeals: MealMenu[];
-  timetable: Timetable;
+  timetables: TimetableByWeek;
 }
 
 const MARCH_SAMPLE_DATA: SampleDataSet = {
@@ -208,27 +208,56 @@ const MARCH_SAMPLE_DATA: SampleDataSet = {
     { date: '2026-03-19', lunch: '給食なし', memo: '短縮4時間' },
     { date: '2026-03-20', lunch: '祝日（春分の日）', memo: '学校休業日' },
   ],
-  timetable: {
-    mon: [
-      { subject: '国語', note: 'ひろがることば／これまでこれから／言葉あそび 日本のことばリズム' },
-      { subject: '算数', note: 'もうすぐ3年生／学習のまとめ' },
-      { subject: '体育', note: '10:20〜11:05（校庭）スペシャルお楽しみ会' },
-      { subject: '図工', note: '11:10〜11:55 作品バッグに自分マークをかこう' },
-    ],
-    tue: [
-      { subject: '学活', note: '通知表を見て来年のめあてを立てよう' },
-      { subject: '生活', note: '3年生の場所をかくにんしよう' },
-      { subject: '国語', note: '連絡帳日記／1年間をふりかえろう' },
-      { subject: '学活', note: '春休みの生活について' },
-    ],
-    wed: [
-      { subject: '国語', note: '3年生になった自分へお手紙' },
-      { subject: '国語', note: '春休み' },
-      { subject: '行事', note: '8:35〜 修了式' },
-      { subject: '行事', note: '10:35〜 離任式' },
-    ],
-    thu: [],
-    fri: [],
+  timetables: {
+    '2026-03-16': {
+      mon: [
+        { subject: '国語', note: '自分はっけん発表会／お気に入りページの発表' },
+        { subject: '生活', note: '自分はっけん発表会／お手紙オープン' },
+        { subject: '算数', note: '学習のまとめ／学活 じゅんび' },
+        { subject: '学活', note: 'お別れ花道（6年生に思いをこめて）' },
+      ],
+      tue: [
+        { subject: '臨時休業', note: '卒業証書授与式' },
+        { subject: '臨時休業' },
+        { subject: '臨時休業' },
+        { subject: '臨時休業' },
+      ],
+      wed: [
+        { subject: '国語', note: '書写／2年生で学習した漢字をまとめよう' },
+        { subject: '図工', note: '紙けん玉を作ろう／作り方を工夫しよう' },
+        { subject: '図工', note: '10:20〜11:05 1年間の作品をまとめよう' },
+        { subject: '体育', note: '11:10〜11:55（校庭）持久走・ボールけり' },
+      ],
+      thu: [
+        { subject: '国語', note: 'ひろがることば／これまでこれから' },
+        { subject: '学活', note: 'お楽しみ会（教室バージョン）' },
+        { subject: '体育', note: '10:20〜11:05（体育館）お楽しみ会 スポーツ版' },
+        { subject: '算数', note: '11:10〜11:55 河合先生と森先生にサプライズ' },
+      ],
+      fri: [{ subject: '春分の日', note: '祝日' }],
+    },
+    '2026-03-23': {
+      mon: [
+        { subject: '国語', note: 'ひろがることば／これまでこれから／言葉あそび 日本のことばリズム' },
+        { subject: '算数', note: 'もうすぐ3年生／学習のまとめ' },
+        { subject: '体育', note: '10:20〜11:05（校庭）スペシャルお楽しみ会' },
+        { subject: '図工', note: '11:10〜11:55 作品バッグに自分マークをかこう' },
+      ],
+      tue: [
+        { subject: '学活', note: '通知表を見て来年のめあてを立てよう' },
+        { subject: '生活', note: '3年生の場所をかくにんしよう' },
+        { subject: '国語', note: '連絡帳日記／1年間をふりかえろう' },
+        { subject: '学活', note: '春休みの生活について' },
+      ],
+      wed: [
+        { subject: '国語', note: '3年生になった自分へお手紙' },
+        { subject: '国語', note: '春休み' },
+        { subject: '行事', note: '8:35〜 修了式' },
+        { subject: '行事', note: '10:35〜 離任式' },
+      ],
+      thu: [],
+      fri: [],
+    },
   },
 };
 
@@ -264,37 +293,39 @@ const APRIL_SAMPLE_DATA: SampleDataSet = {
     { date: '2026-04-09', lunch: 'ごはん／白身魚フライ／磯香和え／みそ汁', memo: '通常給食' },
     { date: '2026-04-10', lunch: 'ミートソーススパゲティ／ツナサラダ／牛乳', memo: '通常給食' },
   ],
-  timetable: {
-    mon: [
-      { subject: '学活', note: '新学期のめあて' },
-      { subject: '国語', note: '自己紹介カード' },
-      { subject: '算数', note: 'かけ算のきほん' },
-      { subject: '生活', note: '春見つけ' },
-    ],
-    tue: [
-      { subject: '国語', note: '音読' },
-      { subject: '算数', note: '九九の復習' },
-      { subject: '体育', note: '整列と準備運動' },
-      { subject: '学活', note: '係決め' },
-    ],
-    wed: [
-      { subject: '国語', note: '漢字の書き順' },
-      { subject: '生活', note: '校内たんけん' },
-      { subject: '図工', note: '春の色さがし' },
-      { subject: '音楽', note: '校歌' },
-    ],
-    thu: [
-      { subject: '算数', note: 'たし算とひき算' },
-      { subject: '国語', note: '日記' },
-      { subject: '体育', note: '50m走' },
-      { subject: '道徳', note: 'あいさつ' },
-    ],
-    fri: [
-      { subject: '生活', note: '学級のやくそく' },
-      { subject: '国語', note: '本のしょうかい' },
-      { subject: '図工', note: '自分の顔を描こう' },
-      { subject: '学活', note: '1週間のふりかえり' },
-    ],
+  timetables: {
+    '2026-04-06': {
+      mon: [
+        { subject: '学活', note: '新学期のめあて' },
+        { subject: '国語', note: '自己紹介カード' },
+        { subject: '算数', note: 'かけ算のきほん' },
+        { subject: '生活', note: '春見つけ' },
+      ],
+      tue: [
+        { subject: '国語', note: '音読' },
+        { subject: '算数', note: '九九の復習' },
+        { subject: '体育', note: '整列と準備運動' },
+        { subject: '学活', note: '係決め' },
+      ],
+      wed: [
+        { subject: '国語', note: '漢字の書き順' },
+        { subject: '生活', note: '校内たんけん' },
+        { subject: '図工', note: '春の色さがし' },
+        { subject: '音楽', note: '校歌' },
+      ],
+      thu: [
+        { subject: '算数', note: 'たし算とひき算' },
+        { subject: '国語', note: '日記' },
+        { subject: '体育', note: '50m走' },
+        { subject: '道徳', note: 'あいさつ' },
+      ],
+      fri: [
+        { subject: '生活', note: '学級のやくそく' },
+        { subject: '国語', note: '本のしょうかい' },
+        { subject: '図工', note: '自分の顔を描こう' },
+        { subject: '学活', note: '1週間のふりかえり' },
+      ],
+    },
   },
 };
 

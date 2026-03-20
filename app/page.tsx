@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Item, Category, SchoolMode, UpdateHistoryEntry } from '@/lib/types';
 import { loadItems, saveItems, loadMode, saveMode, seedSampleData, loadUpdateHistory } from '@/lib/storage';
-import { generateId, getCategoriesForMode, todayString } from '@/lib/utils';
+import { generateId, getCategoriesForMode, getWeekKey, todayString } from '@/lib/utils';
 import { useMealMenus, useTimetable } from '@/lib/hooks';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
@@ -43,7 +43,7 @@ export default function Home() {
   const allItems = useMemo(() => [...nurseryItems, ...elementaryItems], [nurseryItems, elementaryItems]);
 
   const { menus, upsertMenu, deleteMenu } = useMealMenus(mode, loaded);
-  const { timetable, updateTimetable } = useTimetable(loaded);
+  const { timetable, updateTimetable } = useTimetable(loaded, weekViewDate);
 
   const isNursery = mode === 'nursery';
   const today = todayString();
@@ -198,6 +198,7 @@ export default function Home() {
         <TimetableSection
           timetable={timetable}
           baseDate={weekViewDate}
+          weekKey={getWeekKey(weekViewDate)}
           onNavigateWeek={handleNavigateWeekView}
           onResetWeek={handleResetWeekView}
           onUpdate={updateTimetable}

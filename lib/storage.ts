@@ -1,9 +1,10 @@
-import { Item, SchoolMode, MealMenu, Timetable, PickupRecord, HealthRecord, UpdateHistoryEntry } from './types';
+import { Item, SchoolMode, MealMenu, Timetable, TimetableByWeek, PickupRecord, HealthRecord, UpdateHistoryEntry } from './types';
 import {
   getSampleDataForMonth,
   getSampleUpdateHistoryForMonth,
   getSampleMonthKey,
 } from './sampleData';
+import { emptyTimetable, getWeekKey } from './utils';
 
 const STORAGE_PREFIX = 'otayori-board';
 
@@ -13,7 +14,7 @@ function itemsKey(mode: SchoolMode): string {
 
 const MODE_KEY = `${STORAGE_PREFIX}-mode`;
 const UPDATE_HISTORY_KEY = `${STORAGE_PREFIX}-update-history`;
-const SEEDED_TIMETABLE_MONTH_KEY = `${STORAGE_PREFIX}-seeded-timetable-month`;
+const SEEDED_TIMETABLE_MONTHS_KEY = `${STORAGE_PREFIX}-seeded-timetable-months`;
 
 function storageKey(mode: SchoolMode, feature: string): string {
   return `${STORAGE_PREFIX}-${mode}-${feature}`;
@@ -143,6 +144,10 @@ function isEmptyTimetable(timetable: Timetable): boolean {
   return Object.values(timetable).every(entries => entries.length === 0);
 }
 
+function mergeTimetables(existing: TimetableByWeek, incoming: TimetableByWeek): TimetableByWeek {
+  return { ...existing, ...incoming };
+}
+
 export function seedSampleData(): void {
   if (typeof window === 'undefined') return;
   const monthKey = getSampleMonthKey();
@@ -150,17 +155,16 @@ export function seedSampleData(): void {
   if (!sampleData) return;
 
   const seededMonths = loadJson<string[]>(SEEDED_MONTHS_KEY, []);
-  const seededTimetableMonth = loadJson<string>(SEEDED_TIMETABLE_MONTH_KEY, '');
+  const seededTimetableMonths = loadJson<string[]>(SEEDED_TIMETABLE_MONTHS_KEY, []);
 
   saveJson(itemsKey('nursery'), dedupeItems(mergeItems(loadItems('nursery'), sampleData.nurseryItems)));
   saveJson(itemsKey('elementary'), dedupeItems(mergeItems(loadItems('elementary'), sampleData.elementaryItems)));
   saveJson(storageKey('nursery', 'meals'), mergeMeals(loadMealMenus('nursery'), sampleData.nurseryMeals));
   saveJson(storageKey('elementary', 'meals'), mergeMeals(loadMealMenus('elementary'), sampleData.elementaryMeals));
 
-  const currentTimetable = loadTimetable();
-  if (isEmptyTimetable(currentTimetable) || seededTimetableMonth !== monthKey) {
-    saveJson(storageKey('elementary', 'timetable'), sampleData.timetable);
-    saveJson(SEEDED_TIMETABLE_MONTH_KEY, monthKey);
+  if (!seededTimetableMonths.includes(monthKey)) {
+    saveTimetables(mergeTimetables(loadTimetables(), sampleData.timetables));
+    saveJson(SEEDED_TIMETABLE_MONTHS_KEY, [...seededTimetableMonths, monthKey]);
   }
 
   const seededHistory = getSampleUpdateHistoryForMonth(monthKey);
@@ -182,12 +186,29 @@ export function saveMealMenus(mode: SchoolMode, menus: MealMenu[]): void {
 }
 
 // 時間割
-export function loadTimetable(): Timetable {
-  const empty: Timetable = { mon: [], tue: [], wed: [], thu: [], fri: [] };
-  return loadJson(storageKey('elementary', 'timetable'), empty);
+export function loadTimetables(): TimetableByWeek {
+  const empty: TimetableByWeek = {};
+  const raw = loadJson<unknown>(storageKey('elementary', 'timetable'), empty);
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return empty;
+
+  const candidate = raw as Record<string, unknown>;
+  const looksLikeLegacyTimetable = ['mon', 'tue', 'wed', 'thu', 'fri'].some(key => key in candidate);
+  if (looksLikeLegacyTimetable) {
+    const legacy = candidate as unknown as Timetable;
+    if (isEmptyTimetable(legacy)) return empty;
+    return { [getWeekKey()]: legacy };
+  }
+
+  return candidate as TimetableByWeek;
 }
-export function saveTimetable(timetable: Timetable): void {
-  saveJson(storageKey('elementary', 'timetable'), timetable);
+export function saveTimetables(timetables: TimetableByWeek): void {
+  saveJson(storageKey('elementary', 'timetable'), timetables);
+}
+export function loadTimetable(weekKey: string): Timetable {
+  return loadTimetables()[weekKey] ?? emptyTimetable();
+}
+export function saveTimetable(weekKey: string, timetable: Timetable): void {
+  saveTimetables({ ...loadTimetables(), [weekKey]: timetable });
 }
 
 // 更新履歴

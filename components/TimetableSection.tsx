@@ -8,12 +8,13 @@ import TimetableEditModal from './TimetableEditModal';
 interface Props {
   timetable: Timetable;
   baseDate?: Date;
+  weekKey: string;
   onNavigateWeek?: (delta: number) => void;
   onResetWeek?: () => void;
   onUpdate: (timetable: Timetable) => void;
 }
 
-export default function TimetableSection({ timetable, baseDate, onNavigateWeek, onResetWeek, onUpdate }: Props) {
+export default function TimetableSection({ timetable, baseDate, weekKey, onNavigateWeek, onResetWeek, onUpdate }: Props) {
   const [editDay, setEditDay] = useState<Weekday | null>(null);
 
   const maxPeriods = Math.max(1, ...WEEKDAYS.map(d => timetable[d].length));
@@ -30,7 +31,10 @@ export default function TimetableSection({ timetable, baseDate, onNavigateWeek, 
   return (
     <section id="timetable" className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold">時間割</h2>
+        <div>
+          <h2 className="text-lg font-bold">時間割</h2>
+          <p className="text-xs text-gray-400 mt-1">週キー: {weekKey}</p>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => onNavigateWeek?.(-1)}

@@ -1,4 +1,4 @@
-import { Category, SchoolMode, NurseryCategory, ElementaryCategory, Weekday } from './types';
+import { Category, SchoolMode, NurseryCategory, ElementaryCategory, Weekday, Timetable } from './types';
 
 export const NURSERY_CATEGORIES: NurseryCategory[] = ['行事', 'お知らせ', '持ち物'];
 export const ELEMENTARY_CATEGORIES: ElementaryCategory[] = ['行事', '提出物', 'お知らせ', '持ち物'];
@@ -156,6 +156,14 @@ export function getWeekDates(baseDate?: Date): { weekday: Weekday; date: Date; d
     d.setDate(monday.getDate() + i);
     return { weekday: wd, date: d, dateStr: toDateString(d) };
   });
+}
+
+export function getWeekKey(baseDate?: Date): string {
+  return getWeekDates(baseDate)[0].dateStr;
+}
+
+export function emptyTimetable(): Timetable {
+  return { mon: [], tue: [], wed: [], thu: [], fri: [] };
 }
 
 export const CONDITION_LABELS: Record<string, string> = {
