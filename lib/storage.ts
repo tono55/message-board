@@ -226,6 +226,78 @@ function applyMarchWeekProgramFix(sampleData: ReturnType<typeof getSampleDataFor
   }
 }
 
+function applyMarchWeek0316Supplement(sampleData: ReturnType<typeof getSampleDataForMonth>): void {
+  if (!sampleData) return;
+
+  const appliedFixes = loadJson<string[]>(APPLIED_FIXES_KEY, []);
+  const fixId = '2026-03-week-0316-supplement-v2';
+  if (appliedFixes.includes(fixId)) return;
+
+  const correctedItems = new Map(
+    sampleData.elementaryItems
+      .filter(item => ['2026-03-el-1', '2026-03-el-6', '2026-03-el-8', '2026-03-el-15'].includes(item.id))
+      .map(item => [item.id, item]),
+  );
+
+  const legacyMemosById: Record<string, string[]> = {
+    '2026-03-el-1': [
+      '時間割: 国語（自分はっけん発表会）/ 生活（お手紙オープン）/ 算数（学習のまとめ）/ 学活（お別れ花道）。',
+    ],
+    '2026-03-el-6': [
+      '上ばき・体そうふく・工作マット・わりばし・毛糸（1mくらい）・自分はっけんファイル。',
+    ],
+    '2026-03-el-8': [
+      '〜10:30 業間休み / 10:35〜11:10 3時間目 / 11:15〜11:30 そうじ / 11:35〜11:45 帰りのしたく / 11:45〜12:30 給食 / 12:30〜13:00 放送。下校 13:30。',
+    ],
+  };
+
+  const existingItems = loadItems('elementary');
+  let itemFixApplied = false;
+  let hasLetterNotice = existingItems.some(item => item.id === '2026-03-el-15');
+
+  const correctedStoredItems = existingItems.map(item => {
+    const corrected = correctedItems.get(item.id);
+    const legacyMemos = legacyMemosById[item.id];
+    if (!corrected || !legacyMemos?.includes(item.memo)) return item;
+    itemFixApplied = true;
+    return {
+      ...corrected,
+      done: item.done,
+      checkItems: item.checkItems,
+    };
+  });
+
+  if (!hasLetterNotice) {
+    correctedStoredItems.push(correctedItems.get('2026-03-el-15')!);
+    hasLetterNotice = true;
+    itemFixApplied = true;
+  }
+
+  if (itemFixApplied) {
+    saveItems('elementary', correctedStoredItems);
+  }
+
+  const timetable0316 = loadTimetable('2026-03-16');
+  const needsMorningStudyWeek0316 =
+    timetable0316.mon[0]?.subject !== '朝自習' &&
+    timetable0316.mon.some(entry => entry.note === '自分はっけん発表会／お気に入りページの発表') &&
+    timetable0316.wed[0]?.subject !== '朝自習' &&
+    timetable0316.thu[0]?.subject !== '朝自習';
+
+  const needsDismissalWeek0316 =
+    !timetable0316.mon.some(entry => entry.subject === '下校' && entry.note === '13:30') ||
+    !timetable0316.wed.some(entry => entry.subject === '下校' && entry.note === '12:10') ||
+    !timetable0316.thu.some(entry => entry.subject === '下校' && entry.note === '12:10');
+
+  if (needsMorningStudyWeek0316 || needsDismissalWeek0316) {
+    saveTimetable('2026-03-16', sampleData.timetables['2026-03-16']);
+  }
+
+  if (itemFixApplied || needsMorningStudyWeek0316 || needsDismissalWeek0316) {
+    saveJson(APPLIED_FIXES_KEY, [...appliedFixes, fixId]);
+  }
+}
+
 export function seedSampleData(): void {
   if (typeof window === 'undefined') return;
   const monthKey = getSampleMonthKey();
@@ -252,6 +324,7 @@ export function seedSampleData(): void {
 
   if (monthKey === '2026-03') {
     applyMarchWeekProgramFix(sampleData);
+    applyMarchWeek0316Supplement(sampleData);
   }
 
   if (!seededMonths.includes(monthKey)) {

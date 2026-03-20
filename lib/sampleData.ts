@@ -30,7 +30,7 @@ const MARCH_SAMPLE_DATA: SampleDataSet = {
       title: '3月16日（月）行事: 給食最終日・お別れ花道',
       cat: '行事',
       date: '2026-03-16',
-      memo: '時間割: 国語（自分はっけん発表会）/ 生活（お手紙オープン）/ 算数（学習のまとめ）/ 学活（お別れ花道）。',
+      memo: '給食最終日・お別れ花道。下校 13:30。',
       done: false,
       checkItems: [],
       mode: 'elementary',
@@ -80,7 +80,7 @@ const MARCH_SAMPLE_DATA: SampleDataSet = {
       title: '持ち物（3月16日）',
       cat: '持ち物',
       date: '2026-03-16',
-      memo: '上ばき・体そうふく・工作マット・わりばし・毛糸（1mくらい）・自分はっけんファイル。',
+      memo: '上ばき・体そうふく・工作マット・わりばし・毛糸（1mくらい）・自分はっけんファイル・荷物持ち帰りの大きなふくろ。',
       done: false,
       checkItems: [],
       mode: 'elementary',
@@ -100,7 +100,17 @@ const MARCH_SAMPLE_DATA: SampleDataSet = {
       title: '3月16日 連絡',
       cat: 'お知らせ',
       date: '2026-03-16',
-      memo: '〜10:30 業間休み / 10:35〜11:10 3時間目 / 11:15〜11:30 そうじ / 11:35〜11:45 帰りのしたく / 11:45〜12:30 給食 / 12:30〜13:00 放送。下校 13:30。',
+      memo: '〜10:30 業間休み / 10:35〜11:10 3時間目 / 11:15〜11:30 そうじ / 11:35〜11:45 帰りのしたく / 11:45〜12:30 給食 / 12:30〜13:00 放送。下校 13:30。荷物持ち帰りの大きなふくろをもってきましょう。',
+      done: false,
+      checkItems: [],
+      mode: 'elementary',
+    },
+    {
+      id: '2026-03-el-15',
+      title: '3月16日 自分はっけん発表会の連絡',
+      cat: 'お知らせ',
+      date: '2026-03-16',
+      memo: '16日までに、ファイル内の便せんと封筒（ご家庭のものでも可）でお子さんへの手紙を用意。発表会で読むので、封筒は開けずに大切に持たせてください。',
       done: false,
       checkItems: [],
       mode: 'elementary',
@@ -211,6 +221,7 @@ const MARCH_SAMPLE_DATA: SampleDataSet = {
   timetables: {
     '2026-03-16': {
       mon: [
+        { subject: '朝自習', note: '自分はっけん' },
         { subject: '国語', note: '自分はっけん発表会／お気に入りページの発表' },
         { subject: '生活', note: '自分はっけん発表会／お手紙オープン' },
         { subject: '算数', note: '学習のまとめ／学活 じゅんび' },
@@ -225,6 +236,7 @@ const MARCH_SAMPLE_DATA: SampleDataSet = {
         { subject: '下校', note: '' },
       ],
       wed: [
+        { subject: '朝自習', note: '書写' },
         { subject: '国語', note: '書写／2年生で学習した漢字をまとめよう' },
         { subject: '図工', note: '紙けん玉を作ろう／作り方を工夫しよう' },
         { subject: '図工', note: '10:20〜11:05 1年間の作品をまとめよう' },
@@ -232,6 +244,7 @@ const MARCH_SAMPLE_DATA: SampleDataSet = {
         { subject: '下校', note: '12:10' },
       ],
       thu: [
+        { subject: '朝自習', note: '書写' },
         { subject: '国語', note: 'ひろがることば／これまでこれから' },
         { subject: '学活', note: 'お楽しみ会（教室バージョン）' },
         { subject: '体育', note: '10:20〜11:05（体育館）お楽しみ会 スポーツ版' },
