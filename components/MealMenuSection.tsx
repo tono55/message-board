@@ -25,11 +25,9 @@ export default function MealMenuSection({ menus, mode, baseDate, onNavigateWeek,
   const weekLabel = (() => {
     const first = weekDates[0].date;
     const last = weekDates[4].date;
-    const fy = first.getFullYear();
-    const fm = first.getMonth() + 1;
-    const em = last.getMonth() + 1;
-    if (fm !== em) return `${fy}年${fm}月〜${em}月`;
-    return `${fy}年${fm}月`;
+    const firstLabel = `${first.getMonth() + 1}/${first.getDate()}`;
+    const lastLabel = `${last.getMonth() + 1}/${last.getDate()}`;
+    return `${firstLabel} - ${lastLabel}`;
   })();
 
   return (
@@ -43,12 +41,15 @@ export default function MealMenuSection({ menus, mode, baseDate, onNavigateWeek,
           >
             ◀
           </button>
-          <span className="text-sm text-gray-600 min-w-[7rem] text-center">{weekLabel}</span>
+          <div className="min-w-[9rem] text-center leading-tight">
+            <div className="text-[10px] tracking-wide text-gray-400">表示週</div>
+            <div className="text-sm text-gray-600">{weekLabel}</div>
+          </div>
           <button
             onClick={() => onResetWeek?.()}
             className="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 cursor-pointer"
           >
-            今週
+            今週へ戻す
           </button>
           <button
             onClick={() => onNavigateWeek?.(1)}
